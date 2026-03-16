@@ -1,0 +1,339 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model YiraBeneficiaire {
+  id                String   @id @default(cuid())
+  code_yira         String   @unique
+  nom               String
+  prenom            String
+  telephone         String   @unique
+  date_naissance    DateTime
+  genre             String
+  niveau_etude      String
+  district          String
+  commune           String?
+  quartier          String?
+  situation         String?
+  statut_parcours   String   @default("INSCRIT")
+  consentement_rgpd Boolean  @default(false)
+  country_code      String   @default("CI")
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+}
+
+model YiraEvaluation {
+  id               String   @id @default(cuid())
+  beneficiaire_id  String
+  assessment_id    Int?
+  niveau           String
+  score_global     Int?
+  profil_riasec    String?
+  score_aptitudes  Int?
+  score_valeurs    Int?
+  score_leadership Int?
+  rapport_pdf_url  String?
+  statut           String   @default("EN_COURS")
+  canal            String   @default("web")
+  country_code     String   @default("CI")
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model YiraParcours {
+  id               String    @id @default(cuid())
+  beneficiaire_id  String
+  filiere          String
+  niveau           String
+  heures_completees Int       @default(0)
+  statut           String    @default("EN_ATTENTE")
+  note_finale      Float?
+  country_code     String    @default("CI")
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+}
+
+model YiraCertification {
+  id              String    @id @default(cuid())
+  beneficiaire_id String
+  type_certif     String
+  niveau          String
+  statut          String    @default("EN_ATTENTE")
+  qr_code_url     String?
+  pdf_certif_url  String?
+  country_code    String    @default("CI")
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+}
+
+model YiraInsertion {
+  id              String    @id @default(cuid())
+  beneficiaire_id String
+  employeur_id    String?
+  poste           String?
+  type_contrat    String?
+  salaire_mensuel Float?
+  statut          String    @default("EN_RECHERCHE")
+  country_code    String    @default("CI")
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+}
+
+model YiraSuivi {
+  id              String   @id @default(cuid())
+  beneficiaire_id String
+  insertion_id    String?
+  jalon           String
+  en_poste        Boolean?
+  alerte          Boolean  @default(false)
+  country_code    String   @default("CI")
+  created_at      DateTime @default(now())
+}
+
+model YiraEmployeur {
+  id               String   @id @default(cuid())
+  raison_sociale   String
+  secteur          String?
+  district         String?
+  email            String?
+  telephone        String?
+  statut_partenaire String  @default("PROSPECT")
+  country_code     String   @default("CI")
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model YiraQuiz {
+  id            String   @id @default(cuid())
+  categorie     String
+  question      String
+  choix_a       String
+  choix_b       String
+  choix_c       String
+  choix_d       String
+  bonne_reponse String
+  points        Int      @default(10)
+  country_code  String   @default("CI")
+  actif         Boolean  @default(true)
+  created_at    DateTime @default(now())
+}
+
+model YiraScore {
+  id              String   @id @default(cuid())
+  beneficiaire_id String   @unique
+  points_cumules  Int      @default(0)
+  streak_jours    Int      @default(0)
+  country_code    String   @default("CI")
+  updated_at      DateTime @updatedAt
+}
+
+model YiraSmsLog {
+  id              String   @id @default(cuid())
+  beneficiaire_id String
+  type_sms        String
+  telephone       String
+  contenu         String
+  statut          String   @default("EN_ATTENTE")
+  country_code    String   @default("CI")
+  created_at      DateTime @default(now())
+}
+
+model YiraConseiller {
+  id               String   @id @default(cuid())
+  nom              String
+  prenom           String
+  email            String   @unique
+  telephone        String?
+  grade            String   @default("JUNIOR")
+  hashed_password  String
+  country_code     String   @default("CI")
+  actif            Boolean  @default(true)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model YiraCarte {
+  id              String    @id @default(cuid())
+  beneficiaire_id String    @unique
+  qr_code_url     String?
+  statut          String    @default("INACTIVE")
+  date_activation DateTime?
+  certifications  String[]
+  wallet_numero   String?
+  country_code    String    @default("CI")
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+}
+
+model YiraReferentielMetier {
+  id                     String    @id @default(cuid())
+  code_metier            String    @unique
+  intitule               String
+  famille_riasec         String
+  secteur                String
+  competences_techniques String[]
+  soft_skills            String[]
+  niveau_formation_min   String
+  salaire_moy_fcfa       Int?
+  taux_insertion         Float?
+  valide_rncci           Boolean   @default(false)
+  actif                  Boolean   @default(true)
+  country_code           String    @default("CI")
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
+}
+
+model YiraReferentielFiliere {
+  id                    String    @id @default(cuid())
+  code_filiere          String    @unique
+  intitule              String
+  type_filiere          String
+  niveau_cible          String
+  profil_riasec_ideal   String[]
+  debouches_metiers     String[]
+  etablissements_ci     String[]
+  taux_reussite         Float?
+  valide_menet          Boolean   @default(false)
+  actif                 Boolean   @default(true)
+  country_code          String    @default("CI")
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+}
+
+model YiraCurriculum {
+  id                  String    @id @default(cuid())
+  beneficiaire_id     String
+  titre               String
+  points_amelioration String[]
+  modules             Json?
+  progression         Int       @default(0)
+  genere_par_ia       Boolean   @default(true)
+  country_code        String    @default("CI")
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+}
+
+model YiraContenuDidactique {
+  id               String   @id @default(cuid())
+  titre            String
+  type_contenu     String
+  format           String
+  prix_fcfa        Int      @default(0)
+  gratuit          Boolean  @default(false)
+  metiers_associes String[]
+  langue           String   @default("fr")
+  actif            Boolean  @default(true)
+  country_code     String   @default("CI")
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model YiraAuteurExpert {
+  id           String   @id @default(cuid())
+  nom          String
+  prenom       String
+  email        String   @unique
+  specialites  String[]
+  badge_expert Boolean  @default(false)
+  country_code String   @default("CI")
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model YiraOffreEmploi {
+  id                   String    @id @default(cuid())
+  employeur_id         String
+  titre                String
+  niveau_requis        String
+  type_contrat         String
+  statut               String    @default("ACTIVE")
+  nb_postes            Int       @default(1)
+  country_code         String    @default("CI")
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+}
+
+model YiraMatchingCV {
+  id                  String   @id @default(cuid())
+  offre_id            String
+  beneficiaire_id     String
+  score_compatibilite Int
+  rang_classement     Int?
+  justification_ia    String?
+  statut              String   @default("EN_ATTENTE")
+  genere_par_ia       Boolean  @default(true)
+  country_code        String   @default("CI")
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+}
+
+model YiraPartenaire {
+  id               String    @id @default(cuid())
+  nom              String
+  type_partenaire  String
+  email            String?
+  telephone        String?
+  statut           String    @default("PROSPECT")
+  api_active       Boolean   @default(false)
+  valide_nohama    Boolean   @default(false)
+  country_code     String    @default("CI")
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+}
+
+model YiraEtablissement {
+  id                 String   @id @default(cuid())
+  nom                String
+  type_etablissement String
+  cycle              String
+  district           String
+  partenaire_yira    Boolean  @default(false)
+  statut             String   @default("ACTIF")
+  country_code       String   @default("CI")
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+}
+
+model YiraFonctionnaire {
+  id                   String    @id @default(cuid())
+  nom                  String
+  prenom               String
+  matricule            String    @unique
+  ministere            String
+  poste_actuel         String
+  grade                String
+  district_affectation String
+  statut               String    @default("ACTIF")
+  country_code         String    @default("CI")
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+}
+
+model YiraAnalysePredictive {
+  id                    String   @id @default(cuid())
+  beneficiaire_id       String
+  prob_maintien_12mois  Int?
+  prob_promotion_24mois Int?
+  poste_cible           String?
+  genere_par_ia         Boolean  @default(true)
+  country_code          String   @default("CI")
+  created_at            DateTime @default(now())
+}
+
+model YiraPaysConfig {
+  id                String   @id @default(cuid())
+  country_code      String   @unique
+  nom_pays          String
+  langue_principale String   @default("fr")
+  monnaie           String
+  code_ussd         String?
+  operateurs_telecom String[]
+  actif             Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+}
