@@ -20,32 +20,35 @@ export class CarteService {
     return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(codeYira)}`;
   }
 
+  async debugBeneficiaires(): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('YiraBeneficiaire')
+      .select('*')
+      .limit(3);
+    return { data, error, supabase_url: this.config.get('SUPABASE_URL', 'NON DEFINI') };
+  }
+
   async getProfilPublic(codeYira: string): Promise<any> {
     this.logger.log(`Recherche profil pour: ${codeYira}`);
 
-    // Utiliser filter avec le nom exact de colonne entre guillemets
-    const { data: benef, error: benefError } = await this.supabase
+    const { data: tous } = await this.supabase
       .from('YiraBeneficiaire')
-      .select('*')
-      .filter('codeYira', 'eq', codeYira)
-      .maybeSingle();
+      .select('id, codeYira, nom, prenom')
+      .limit(5);
 
-    this.logger.log(`Résultat: ${JSON.stringify(benef)} | Erreur: ${JSON.stringify(benefError)}`);
+    this.logger.log(`Tous les bénéficiaires: ${JSON.stringify(tous)}`);
+
+    const benef = tous?.find((b: any) => b.codeYira === codeYira);
 
     if (!benef) {
-      // Essayer avec id direct
-      const { data: benef2 } = await this.supabase
-        .from('YiraBeneficiaire')
-        .select('*')
-        .limit(1);
-      this.logger.log(`Premier enregistrement: ${JSON.stringify(benef2)}`);
+      this.logger.warn(`Profil ${codeYira} non trouvé parmi: ${JSON.stringify(tous?.map((b:any) => b.codeYira))}`);
       throw new NotFoundException(`Profil ${codeYira} non trouvé`);
     }
 
     const { data: carte } = await this.supabase
       .from('YiraCarte')
       .select('*')
-      .filter('beneficiaireId', 'eq', benef.id)
+      .eq('beneficiaireId', benef.id)
       .maybeSingle();
 
     return {
@@ -55,7 +58,7 @@ export class CarteService {
       district: benef.district,
       statut_parcours: benef.statutParcours,
       carte_statut: carte?.statut || 'ACTIVE',
-      score_global: carte?.scoreGlobal || null,
+      score_global: null,
       profil_riasec: null,
       certifications: [],
       verifie_nohama: false,
@@ -71,9 +74,7 @@ export class CarteService {
       .select('*')
       .eq('id', beneficiaire_id)
       .maybeSingle();
-
     if (!benef) throw new NotFoundException('Beneficiaire non trouve');
-
     const { data, error } = await this.supabase
       .from('YiraCarte')
       .insert({
@@ -86,7 +87,6 @@ export class CarteService {
       })
       .select()
       .single();
-
     if (error) throw new Error(error.message);
     return data;
   }
@@ -95,30 +95,19 @@ export class CarteService {
     const { data, error } = await this.supabase
       .from('YiraCarte')
       .update({ statut: 'ACTIVE', updatedAt: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
+      .eq('id', id).select().single();
     if (error) throw new Error(error.message);
     return data;
   }
 
   async ajouterCertification(id: string, certification: string): Promise<any> {
     const { data: carte } = await this.supabase
-      .from('YiraCarte')
-      .select('certifications')
-      .eq('id', id)
-      .maybeSingle();
-
+      .from('YiraCarte').select('certifications').eq('id', id).maybeSingle();
     if (!carte) throw new NotFoundException('Carte non trouvee');
     const certifications = [...(carte.certifications || []), certification];
-
     const { data, error } = await this.supabase
-      .from('YiraCarte')
-      .update({ certifications, updatedAt: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-
+      .from('YiraCarte').update({ certifications, updatedAt: new Date().toISOString() })
+      .eq('id', id).select().single();
     if (error) throw new Error(error.message);
     return data;
   }
@@ -127,19 +116,14 @@ export class CarteService {
     const { data, error } = await this.supabase
       .from('YiraCarte')
       .update({ walletNumero: wallet_numero, updatedAt: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
+      .eq('id', id).select().single();
     if (error) throw new Error(error.message);
     return data;
   }
 
   async getStatsCarte(country_code = 'CI'): Promise<any> {
     const { count: total } = await this.supabase
-      .from('YiraCarte')
-      .select('*', { count: 'exact', head: true })
-      .eq('country_code', country_code);
-    return { total_cartes: total || 0, cartes_actives: total || 0 };
+      .from('YiraCarte').select('*', { count: 'exact', head: true }).eq('country_code', country_code);
+    return { total_cartes: total || 0 };
   }
 }
-// Deploy Sat Mar 21 20:38:06 UTC 2026
