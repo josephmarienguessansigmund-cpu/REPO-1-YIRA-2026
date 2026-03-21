@@ -109,4 +109,20 @@ export class IaService {
     const userMessage = `Predie: Prenom: ${params.prenom}, RIASEC: ${params.profil_riasec}, Score: ${params.score_global}/100, Leadership: ${params.score_leadership||0}/100, Niveau: ${params.niveau_etude}, Metier: ${params.metier_actuel_ou_cible}, District: ${params.district}. JSON: { probabilites: {maintien_poste_6mois, maintien_poste_12mois, promotion_12mois, promotion_24mois}, evolution_6mois, evolution_12mois, evolution_24mois, poste_cible_optimal, facteurs_succes, risques_identifies, actions_prioritaires, salaire_estime_12mois, salaire_estime_24mois }`;
     return this.appelClaude(systemPrompt, userMessage);
   }
+
+  async testerNIE(): Promise<any> {
+    const cle = this.anthropicApiKey;
+    if (!cle || cle.length < 10) {
+      return { status: 'erreur', message: 'ANTHROPIC_API_KEY non configuree', nie: 'INACTIF' };
+    }
+    try {
+      const resultat = await this.appelClaude(
+        'Tu es le NOHAMA Intelligence Engine de YIRA CI. Reponds en JSON uniquement.',
+        'Dis bonjour en JSON: { "status": "ok", "message": "NIE actif", "version": "1.0" }'
+      );
+      return { status: 'ok', nie: 'ACTIF', modele: this.model, reponse: resultat };
+    } catch (err) {
+      return { status: 'erreur', nie: 'INACTIF', message: err.message };
+    }
+  }
 }
