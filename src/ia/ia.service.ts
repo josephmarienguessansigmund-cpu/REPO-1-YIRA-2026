@@ -6,7 +6,7 @@ import axios from 'axios';
 export class IaService {
   private readonly logger = new Logger(IaService.name);
   private readonly anthropicApiKey: string;
-  private readonly model = 'claude-sonnet-4-20250514';
+  private readonly model = 'claude-3-5-sonnet-20241022';
 
   constructor(private config: ConfigService) {
     this.anthropicApiKey = this.config.get<string>('ANTHROPIC_API_KEY', '');
