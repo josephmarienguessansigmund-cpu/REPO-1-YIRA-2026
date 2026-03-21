@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9,74 +9,132 @@ export class CarteService {
   private readonly baseUrl: string;
 
   constructor(private config: ConfigService) {
-    this.supabase = createClient(this.config.get('SUPABASE_URL', ''), this.config.get('SUPABASE_SERVICE_KEY', ''));
+    this.supabase = createClient(
+      this.config.get('SUPABASE_URL', ''),
+      this.config.get('SUPABASE_SERVICE_KEY', '')
+    );
     this.baseUrl = this.config.get('API_URL', 'https://yira-api-production.up.railway.app');
   }
 
   private genererQRCodeUrl(codeYira: string): string {
-    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`${this.baseUrl}/api/v1/carte/${codeYira}`)}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(codeYira)}`;
   }
 
   async getProfilPublic(codeYira: string): Promise<any> {
-    try {
-      // Chercher le bénéficiaire avec la bonne colonne codeYira
-      const { data: benef, error: benefError } = await this.supabase
-        .from('YiraBeneficiaire')
-        .select('id, "codeYira", nom, prenom, district, "statutParcours", country_code')
-        .eq('codeYira', codeYira)
-        .single();
+    this.logger.log(`Recherche profil pour: ${codeYira}`);
 
-      if (benefError || !benef) {
-        throw new Error('Profil non trouve: ' + (benefError?.message || 'inconnu'));
-      }
+    // Chercher bénéficiaire - utiliser les vrais noms de colonnes Supabase
+    const { data: benef, error: benefError } = await this.supabase
+      .from('YiraBeneficiaire')
+      .select('*')
+      .eq('codeYira', codeYira)
+      .maybeSingle();
 
-      // Chercher la carte
-      const { data: carte } = await this.supabase
-        .from('YiraCarte')
-        .select('*')
-        .eq('beneficiaireId', benef.id)
-        .single();
+    this.logger.log(`Bénéficiaire trouvé: ${JSON.stringify(benef)}`);
+    this.logger.log(`Erreur bénéficiaire: ${JSON.stringify(benefError)}`);
 
-      return {
-        code_yira: benef.codeYira,
-        nom: benef.nom,
-        prenom: benef.prenom,
-        district: benef.district,
-        statut_parcours: benef.statutParcours,
-        carte_statut: carte?.statut || 'ACTIVE',
-        profil_riasec: null,
-        score_global: carte?.scoreGlobal || null,
-        certifications: [],
-        verifie_nohama: false,
-        qr_code_url: this.genererQRCodeUrl(codeYira),
-        url_verification: `${this.baseUrl}/api/v1/carte/${codeYira}`,
-        timestamp: new Date().toISOString(),
-      };
-    } catch (e) {
-      this.logger.error('Erreur getProfilPublic: ' + e.message);
-      throw e;
+    if (!benef) {
+      throw new NotFoundException(`Profil ${codeYira} non trouvé`);
     }
+
+    // Chercher carte si elle existe
+    const { data: carte } = await this.supabase
+      .from('YiraCarte')
+      .select('*')
+      .eq('beneficiaireId', benef.id)
+      .maybeSingle();
+
+    return {
+      code_yira: benef.codeYira,
+      nom: benef.nom,
+      prenom: benef.prenom,
+      district: benef.district,
+      statut_parcours: benef.statutParcours,
+      carte_statut: carte?.statut || 'ACTIVE',
+      score_global: carte?.scoreGlobal || null,
+      profil_riasec: null,
+      certifications: [],
+      verifie_nohama: false,
+      qr_code_url: this.genererQRCodeUrl(codeYira),
+      url_verification: `${this.baseUrl}/api/v1/carte/${codeYira}`,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   async creerCarte(beneficiaire_id: string): Promise<any> {
-    const { data: benef } = await this.supabase.from('YiraBeneficiaire').select('*').eq('id', beneficiaire_id).single();
-    if (!benef) throw new Error('Beneficiaire non trouve');
-    const qrCodeUrl = this.genererQRCodeUrl(benef.codeYira);
-    const { data, error } = await this.supabase.from('YiraCarte').insert({
-      id: crypto.randomUUID(),
-      beneficiaireId: beneficiaire_id,
-      qrCodeUrl,
-      statut: 'ACTIVE',
-      certifications: [],
-      country_code: benef.country_code || 'CI',
-      updatedAt: new Date(),
-    }).select().single();
+    const { data: benef } = await this.supabase
+      .from('YiraBeneficiaire')
+      .select('*')
+      .eq('id', beneficiaire_id)
+      .maybeSingle();
+
+    if (!benef) throw new NotFoundException('Beneficiaire non trouve');
+
+    const { data, error } = await this.supabase
+      .from('YiraCarte')
+      .insert({
+        beneficiaireId: beneficiaire_id,
+        qrCodeUrl: this.genererQRCodeUrl(benef.codeYira),
+        statut: 'ACTIVE',
+        certifications: [],
+        country_code: benef.country_code || 'CI',
+        updatedAt: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async activerCarte(id: string): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('YiraCarte')
+      .update({ statut: 'ACTIVE', updatedAt: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async ajouterCertification(id: string, certification: string): Promise<any> {
+    const { data: carte } = await this.supabase
+      .from('YiraCarte')
+      .select('certifications')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!carte) throw new NotFoundException('Carte non trouvee');
+    const certifications = [...(carte.certifications || []), certification];
+
+    const { data, error } = await this.supabase
+      .from('YiraCarte')
+      .update({ certifications, updatedAt: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async lierWallet(id: string, wallet_numero: string): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('YiraCarte')
+      .update({ walletNumero: wallet_numero, updatedAt: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return data;
   }
 
   async getStatsCarte(country_code = 'CI'): Promise<any> {
-    const { count: total } = await this.supabase.from('YiraCarte').select('*', { count: 'exact', head: true }).eq('country_code', country_code);
+    const { count: total } = await this.supabase
+      .from('YiraCarte')
+      .select('*', { count: 'exact', head: true })
+      .eq('country_code', country_code);
     return { total_cartes: total || 0, cartes_actives: total || 0 };
   }
 }
