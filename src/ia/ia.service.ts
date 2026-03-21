@@ -115,17 +115,20 @@ export class IaService {
 
   async testerNIE(): Promise<any> {
     const cle = this.anthropicApiKey;
+    const cleInfo = cle ? `${cle.substring(0,15)}...(${cle.length} chars)` : 'NON DEFINIE';
     if (!cle || cle.length < 10) {
-      return { status: 'erreur', message: 'ANTHROPIC_API_KEY non configuree', nie: 'INACTIF' };
+      return { status: 'erreur', nie: 'INACTIF', message: 'Clé non configurée', cle_info: cleInfo };
     }
     try {
-      const resultat = await this.appelClaude(
-        'Tu es le NOHAMA Intelligence Engine de YIRA CI. Reponds en JSON uniquement.',
-        'Dis bonjour en JSON: { "status": "ok", "message": "NIE actif", "version": "1.0" }'
-      );
-      return { status: 'ok', nie: 'ACTIF', modele: this.model, reponse: resultat };
+      const response = await axios.post('https://api.anthropic.com/v1/messages', {
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 50,
+        messages: [{ role: 'user', content: 'Say OK' }],
+      }, { headers: { 'x-api-key': cle, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
+      return { status: 'ok', nie: 'ACTIF', modele: 'claude-3-haiku-20240307', cle_info: cleInfo, reponse: response.data.content[0].text };
     } catch (err) {
-      return { status: 'erreur', nie: 'INACTIF', message: err.message };
+      const detail = err.response?.data ? JSON.stringify(err.response.data) : err.message;
+      return { status: 'erreur', nie: 'INACTIF', erreur: detail, cle_info: cleInfo };
     }
   }
 }
