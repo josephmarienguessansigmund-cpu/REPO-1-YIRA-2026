@@ -19,7 +19,10 @@ export class IaService {
         system: systemPrompt, messages: [{ role: 'user', content: userMessage }],
       }, { headers: { 'x-api-key': this.anthropicApiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
       return response.data.content[0].text;
-    } catch (err) { throw new Error(`NIE indisponible: ${err.message}`); }
+    } catch (err) { 
+      const detail = err.response?.data ? JSON.stringify(err.response.data) : err.message;
+      throw new Error(`NIE indisponible: ${detail}`); 
+    }
   }
 
   private getContextePays(country_code: string, langue: string): string {
