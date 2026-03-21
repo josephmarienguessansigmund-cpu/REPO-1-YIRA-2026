@@ -6,7 +6,8 @@
     "build": "nest build",
     "start": "node dist/main",
     "start:dev": "nest start --watch",
-    "start:prod": "node dist/main"
+    "start:prod": "node dist/main",
+    "prebuild": "rimraf dist"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -34,6 +35,7 @@
     "@types/passport-jwt": "^4.0.0",
     "@types/xml2js": "^0.4.14",
     "typescript": "^5.0.0",
-    "ts-node": "^10.9.0"
+    "ts-node": "^10.9.0",
+    "rimraf": "^5.0.0"
   }
 }
