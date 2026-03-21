@@ -23,25 +23,29 @@ export class CarteService {
   async getProfilPublic(codeYira: string): Promise<any> {
     this.logger.log(`Recherche profil pour: ${codeYira}`);
 
-    // Chercher bénéficiaire - utiliser les vrais noms de colonnes Supabase
+    // Utiliser filter avec le nom exact de colonne entre guillemets
     const { data: benef, error: benefError } = await this.supabase
       .from('YiraBeneficiaire')
       .select('*')
-      .eq('codeYira', codeYira)
+      .filter('codeYira', 'eq', codeYira)
       .maybeSingle();
 
-    this.logger.log(`Bénéficiaire trouvé: ${JSON.stringify(benef)}`);
-    this.logger.log(`Erreur bénéficiaire: ${JSON.stringify(benefError)}`);
+    this.logger.log(`Résultat: ${JSON.stringify(benef)} | Erreur: ${JSON.stringify(benefError)}`);
 
     if (!benef) {
+      // Essayer avec id direct
+      const { data: benef2 } = await this.supabase
+        .from('YiraBeneficiaire')
+        .select('*')
+        .limit(1);
+      this.logger.log(`Premier enregistrement: ${JSON.stringify(benef2)}`);
       throw new NotFoundException(`Profil ${codeYira} non trouvé`);
     }
 
-    // Chercher carte si elle existe
     const { data: carte } = await this.supabase
       .from('YiraCarte')
       .select('*')
-      .eq('beneficiaireId', benef.id)
+      .filter('beneficiaireId', 'eq', benef.id)
       .maybeSingle();
 
     return {
