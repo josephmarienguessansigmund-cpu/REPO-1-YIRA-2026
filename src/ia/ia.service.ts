@@ -7,7 +7,7 @@ export class IaService {
   private readonly logger = new Logger(IaService.name);
   private readonly geminiApiKey: string;
   private readonly anthropicApiKey: string;
-  private readonly model = 'gemini-1.5-flash';
+  private readonly model = 'gemini-2.0-flash';
 
   constructor(private config: ConfigService) {
     this.geminiApiKey = this.config.get<string>('GEMINI_API_KEY', '');
@@ -24,7 +24,7 @@ export class IaService {
 
   private async appelGemini(systemPrompt: string, userMessage: string): Promise<string> {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${this.geminiApiKey}`;
       const response = await axios.post(url, {
         contents: [{ parts: [{ text: `${systemPrompt}\n\n${userMessage}` }] }],
         generationConfig: { maxOutputTokens: 2000, temperature: 0.7 }
@@ -151,7 +151,7 @@ export class IaService {
         status: 'ok', 
         nie: 'ACTIF', 
         moteur,
-        modele: moteur === 'Gemini' ? 'gemini-1.5-flash' : 'claude-3-haiku-20240307',
+        modele: moteur === 'Gemini' ? 'gemini-2.0-flash' : 'claude-3-haiku-20240307',
         reponse 
       };
     } catch (err) {
