@@ -24,7 +24,7 @@ export class IaService {
 
   private async appelGemini(systemPrompt: string, userMessage: string): Promise<string> {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.geminiApiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${this.geminiApiKey}`;
       const response = await axios.post(url, {
         contents: [{ parts: [{ text: `${systemPrompt}\n\n${userMessage}` }] }],
         generationConfig: { maxOutputTokens: 2000, temperature: 0.7 }
@@ -159,4 +159,4 @@ export class IaService {
     }
   }
 }
-// Gemini fix 1774139081
+// Deploy 1774178230
