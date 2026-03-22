@@ -24,7 +24,7 @@ export class IaService {
 
   private async appelGemini(systemPrompt: string, userMessage: string): Promise<string> {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.geminiApiKey}`;
       const response = await axios.post(url, {
         contents: [{ parts: [{ text: `${systemPrompt}\n\n${userMessage}` }] }],
         generationConfig: { maxOutputTokens: 2000, temperature: 0.7 }
