@@ -19,7 +19,7 @@ export class IaService {
     if (this.geminiApiKey && this.geminiApiKey.length > 10) {
       return this.appelGemini(systemPrompt, userMessage);
     }
-    return this.appelNIE(systemPrompt, userMessage);
+    return this.appelClaude(systemPrompt, userMessage);
   }
 
   private async appelGemini(systemPrompt: string, userMessage: string): Promise<string> {
