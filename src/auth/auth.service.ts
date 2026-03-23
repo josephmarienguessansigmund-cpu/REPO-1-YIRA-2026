@@ -44,7 +44,7 @@ export class AuthService {
   async inscrireBeneficiaire(dto: any) {
     const code_yira = this.generateCodeYira();
     const { data, error } = await this.supabase.from('YiraBeneficiaire')
-      .insert({ ...dto, code_yira, statut_parcours: 'INSCRIT', country_code: dto.country_code || 'CI' })
+      .insert({ nom: dto.nom, prenom: dto.prenom, telephone: dto.telephone, genre: dto.genre, niveau: dto.niveau_etude, district: dto.district, country_code: dto.country_code || 'CI', codeYira: code_yira, statutParcours: 'INSCRIT', typeProfile: 'jeune', consentementRGPD: false, updatedAt: new Date().toISOString() })
       .select().single();
     if (error) throw new BadRequestException(error.message);
     return { beneficiaire: data, code_yira };
