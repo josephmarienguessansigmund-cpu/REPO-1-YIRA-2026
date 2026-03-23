@@ -1,9 +1,26 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { IaService } from './ia.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('ia')
 export class IaController {
+
+  // Endpoint public - démonstration NIE sans JWT
+  @Get('demo/:code_yira')
+  async demoOrientation(@Param('code_yira') code: string) {
+    return this.iaService.genererRapportOrientation({
+      prenom: 'Bénéficiaire',
+      profil_riasec: 'RIS',
+      score_global: 82,
+      score_aptitudes: 88,
+      niveau_etude: 'bac',
+      district: 'Abidjan',
+      age: 22,
+      country_code: 'CI',
+      langue: 'fr',
+      code_yira: code
+    });
+  }
   constructor(private readonly iaService: IaService) {}
 
   // Endpoint public pour tester le NIE
