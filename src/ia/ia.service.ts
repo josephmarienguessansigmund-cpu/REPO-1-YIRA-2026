@@ -39,7 +39,7 @@ export class IaService {
   private async appelClaude(systemPrompt: string, userMessage: string): Promise<string> {
     try {
       const response = await axios.post('https://api.anthropic.com/v1/messages', {
-        model: 'claude-3-haiku-20240307', max_tokens: 2000,
+        model: 'claude-haiku-4-5-20251001', max_tokens: 2000,
         system: systemPrompt, messages: [{ role: 'user', content: userMessage }],
       }, { headers: { 'x-api-key': this.anthropicApiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
       return response.data.content[0].text;
@@ -151,7 +151,7 @@ export class IaService {
         status: 'ok', 
         nie: 'ACTIF', 
         moteur,
-        modele: moteur === 'Gemini' ? 'gemini-1.5-flash-latest' : 'claude-3-haiku-20240307',
+        modele: moteur === 'Gemini' ? 'gemini-1.5-flash-latest' : 'claude-haiku-4-5-20251001',
         reponse 
       };
     } catch (err) {
