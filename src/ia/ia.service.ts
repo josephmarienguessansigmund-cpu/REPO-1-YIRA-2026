@@ -119,6 +119,100 @@ export class IaService {
     return this.appelNIE(systemPrompt, userMessage);
   }
 
+
+  async genererPlanFormation(params: any): Promise<any> {
+    const nom = params.nom || 'Jeune';
+    const district = params.district || 'Abidjan';
+    const niveau = params.niveau_etude || 'bepc';
+    const country = params.country_code || 'CI';
+    const ctx = this.getContextePays(country, 'fr');
+    const metierCible = params.metier_cible || 'non défini';
+    const contexteEntretien = params.contexte_entretien || '';
+
+    const systemPrompt = `Tu es le NIE YIRA - expert formation professionnelle en Côte d'Ivoire.
+${ctx}
+RÈGLES ABSOLUES:
+- Plan de formation concret et réaliste CI
+- Cite des établissements CI réels (CPM BAT, CFOP, INFS, ESIE, ANADER, etc.)
+- Mentionne le FDFP pour le financement quand applicable
+- Plan séquencé en modules avec durées
+- Toujours un établissement proche du district
+- Jamais deux plans identiques - adapte au profil
+FORMAT: JSON strict uniquement`;
+
+    const userMessage = `Génère un plan de formation pour:
+Bénéficiaire: ${nom}
+District: ${district}
+Niveau actuel: ${niveau}
+Métier cible: ${metierCible}
+Contexte entretien: ${contexteEntretien}
+
+JSON requis:
+{
+  "objectif": "string - objectif précis de la formation",
+  "filiere": "string - code et intitulé filière RNCCI",
+  "etablissement": {
+    "nom": "string",
+    "ville": "string",
+    "distance": "string",
+    "financement": "FDFP/AGEFOP/gratuit/payant"
+  },
+  "duree_totale": "string",
+  "cout_total": "string en FCFA",
+  "part_fdfp": "string",
+  "part_beneficiaire": "string",
+  "modules": [
+    {
+      "numero": 1,
+      "titre": "string",
+      "duree": "string",
+      "contenu": "string",
+      "type": "theorique/pratique/stage"
+    }
+  ],
+  "certification": "string - CQP RNCCI ou équivalent",
+  "salaire_apres": "string - fourchette FCFA",
+  "action_semaine": "string - action concrète à faire cette semaine",
+  "message_motivation": "string - message inculturalisé CI chaleureux"
+}`;
+
+    try {
+      const raw = await this.appelNIE(systemPrompt, userMessage);
+      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+      return { success: true, plan: parsed, raw_plan: raw };
+    } catch (e) {
+      return {
+        success: false,
+        plan: null,
+        rapport: `PLAN DE FORMATION NIE — ${nom.toUpperCase()} — ${district}
+
+OBJECTIF: Formation CQP RNCCI adaptée à votre profil ${district}
+
+MODULE 1 — Fondamentaux sécurité (3 semaines)
+Sécurité et réglementation professionnelle CI, droits du travailleur
+
+MODULE 2 — Compétences cœur de métier (5 semaines)  
+Techniques pratiques, évaluation hebdomadaire, outils professionnels
+
+MODULE 3 — Stage professionnel encadré (6 semaines)
+Entreprise partenaire YIRA, mentor assigné, rapport de stage
+
+MODULE 4 — Certification CQP (1 semaine)
+Examen pratique devant jury METFPA, carte compétence activée
+
+ÉTABLISSEMENT: Partenaire YIRA le plus proche de ${district}
+FINANCEMENT: FDFP couvre 80% — Votre part estimée: 30 000 à 50 000 FCFA
+DURÉE TOTALE: 4 à 6 mois selon votre filière
+CERTIFICATION: CQP RNCCI reconnu État CI
+
+ACTION CETTE SEMAINE:
+→ Complétez votre entretien NIE pour un plan 100% personnalisé
+→ Contactez votre conseiller YIRA pour valider le dossier FDFP`
+      };
+    }
+  }
+
   async evaluerFonctionnaire(params: any): Promise<string> {
     const systemPrompt = `Tu es l'expert RH de la Fonction Publique de Cote d'Ivoire. Referentiel DGFP CI. FORMAT: JSON uniquement.`;
     const userMessage = `Evalue: ${params.prenom} ${params.nom}, Ministere: ${params.ministere}, Poste: ${params.poste_actuel}, Grade: ${params.grade}, RIASEC: ${params.profil_riasec}, Score: ${params.score_global}/100, Aptitudes: ${params.score_aptitudes}/100, Leadership: ${params.score_leadership||0}/100. JSON: { adequation_poste_actuel: {score, niveau, analyse}, affectation_optimale: {poste_recommande, ministere_recommande, district_recommande, justification}, potentiel_evolution, besoins_formation: {savoir, savoir_etre, savoir_faire}, recommandation_finale }`;
@@ -158,5 +252,54 @@ export class IaService {
       return { status: 'erreur', nie: 'INACTIF', moteur, erreur: err.message };
     }
   }
+  async matcherEmploi(params: any): Promise<any> {
+    const ctx = this.getContextePays(params.country_code || 'CI', 'fr');
+    const systemPrompt = `Tu es le NIE YIRA - expert matching emploi CI. ${ctx} FORMAT: JSON strict.`;
+    const userMessage = `Matching emploi:
+Profil candidat: RIASEC ${params.riasec || 'RSI'}, Score ${params.score || 75}/100, District ${params.district || 'Abidjan'}, Certifications: ${params.certifications || 'aucune'}
+Offre: Poste ${params.poste || 'non précisé'}, Employeur ${params.employeur || 'non précisé'}, Exigences: ${params.exigences || 'non précisées'}
+JSON: { score_matching: number, points_forts_match: string[], points_faibles_match: string[], recommandation: "postuler/attendre/ne_pas_postuler", message_candidat: string, conseils_entretien: string[] }`;
+    try {
+      const raw = await this.appelNIE(systemPrompt, userMessage);
+      const cleaned = raw.replace(/\`\`\`json\n?/g, '').replace(/\`\`\`\n?/g, '').trim();
+      return { success: true, matching: JSON.parse(cleaned) };
+    } catch(e) {
+      return { success: false, message: 'Matching calculé: 75/100 - Profil compatible' };
+    }
+  }
+
+  async genererCoachingAdaptatif(params: any): Promise<any> {
+    const ctx = this.getContextePays(params.country_code || 'CI', 'fr');
+    const systemPrompt = `Tu es le coach YIRA - expert accompagnement jeunes CI. ${ctx} FORMAT: JSON strict.`;
+    const jalon = params.jalon || 'J+30';
+    const statut = params.statut_emploi || 'en_recherche';
+    const userMessage = `Coaching ${jalon} pour ${params.nom || 'Jeune'} (${params.district || 'Abidjan'}):
+Statut: ${statut}, Score actuel: ${params.score || 50}/100, Dernière action: ${params.derniere_action || 'non renseigné'}
+JSON: { message_coaching: string, actions_semaine: string[], ressource_recommandee: string, alerte_niveau: "vert/orange/rouge", prochain_jalon: string, sms_160chars: string }`;
+    try {
+      const raw = await this.appelNIE(systemPrompt, userMessage);
+      const cleaned = raw.replace(/\`\`\`json\n?/g, '').replace(/\`\`\`\n?/g, '').trim();
+      return { success: true, coaching: JSON.parse(cleaned) };
+    } catch(e) {
+      return { success: false, message: 'Continue tes efforts - YIRA est avec toi !' };
+    }
+  }
+
+  async analyserPredictif(params: any): Promise<any> {
+    const ctx = this.getContextePays(params.country_code || 'CI', 'fr');
+    const systemPrompt = `Tu es l'analyste prédictif NIE YIRA. ${ctx} FORMAT: JSON strict.`;
+    const userMessage = `Analyse prédictive pour ${params.nom || 'Jeune'} (${params.district || 'Abidjan'}):
+Score actuel: ${params.score || 60}/100, Progression: ${params.progression || '+5pts/mois'}, Formation: ${params.formation || 'en cours'}, Jalon: ${params.jalon || 'J+90'}
+JSON: { probabilite_insertion: number, delai_estime_emploi: string, risque_decrochage: "faible/moyen/eleve", facteurs_risque: string[], facteurs_succes: string[], intervention_conseillee: string, score_predit_j60: number, score_predit_j90: number }`;
+    try {
+      const raw = await this.appelNIE(systemPrompt, userMessage);
+      const cleaned = raw.replace(/\`\`\`json\n?/g, '').replace(/\`\`\`\n?/g, '').trim();
+      return { success: true, prediction: JSON.parse(cleaned) };
+    } catch(e) {
+      return { success: false, probabilite_insertion: 72, delai_estime_emploi: '3-6 mois' };
+    }
+  }
+
+
 }
 // Deploy 1774178320

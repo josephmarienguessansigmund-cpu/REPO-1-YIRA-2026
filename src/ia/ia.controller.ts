@@ -58,6 +58,19 @@ export class IaController {
   async diagnosticOrga(@Body() dto: any) { return this.iaService.diagnosticOrganisationnel(dto); }
 
   @UseGuards(JwtAuthGuard)
+
+  @Post('formation')
+  async formation(@Body() dto: any) { return this.iaService.genererPlanFormation(dto); }
+
+  @Post('matching-emploi')
+  async matchingEmploi(@Body() dto: any) { return this.iaService.matcherEmploi(dto); }
+
+  @Post('coaching-adaptatif')
+  async coachingAdaptatif(@Body() dto: any) { return this.iaService.genererCoachingAdaptatif(dto); }
+
+  @Post('analyse-predictive')
+  async analysePredictive(@Body() dto: any) { return this.iaService.analyserPredictif(dto); }
+
   @Post('fonctionnaire')
   async fonctionnaire(@Body() dto: any) { return this.iaService.evaluerFonctionnaire(dto); }
 
