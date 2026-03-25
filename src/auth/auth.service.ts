@@ -25,20 +25,20 @@ export class AuthService {
     const hashed_password = await bcrypt.hash(dto.password, 10);
     const { data, error } = await this.supabase
       .from('YiraConseiller')
-      .insert({ ...dto, hashed_password, country_code: dto.country_code || 'CI' })
+      .insert({ ...dto, hashedPassword: hashed_password, country_code: dto.country_code || 'CI' })
       .select().single();
     if (error) throw new BadRequestException(error.message);
-    const token = this.jwtService.sign({ sub: data.id, email: data.email, grade: data.grade, country_code: data.country_code });
+    const token = this.jwtService.sign({ sub: data.id, email: data.email, role: data.role, country_code: data.country_code });
     return { conseiller: data, access_token: token };
   }
 
   async loginConseiller(email: string, password: string) {
     const { data, error } = await this.supabase.from('YiraConseiller').select('*').eq('email', email).eq('actif', true).single();
     if (error || !data) throw new UnauthorizedException('Email ou mot de passe incorrect');
-    const valid = await bcrypt.compare(password, data.hashed_password);
+    const valid = await bcrypt.compare(password, data.hashedPassword);
     if (!valid) throw new UnauthorizedException('Email ou mot de passe incorrect');
-    const token = this.jwtService.sign({ sub: data.id, email: data.email, grade: data.grade, country_code: data.country_code });
-    return { access_token: token, conseiller: { id: data.id, nom: data.nom, prenom: data.prenom, email: data.email, grade: data.grade } };
+    const token = this.jwtService.sign({ sub: data.id, email: data.email, role: data.role, country_code: data.country_code });
+    return { access_token: token, conseiller: { id: data.id, nom: data.nom, prenom: data.prenom, email: data.email, role: data.role } };
   }
 
   async inscrireBeneficiaire(dto: any) {
