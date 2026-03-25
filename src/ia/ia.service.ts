@@ -66,8 +66,51 @@ export class IaService {
 
   async genererRapportOrientation(params: any): Promise<string> {
     const ctx = this.getContextePays(params.country_code || 'CI', params.langue || 'fr');
-    const systemPrompt = `Tu es l'assistant d'orientation de YIRA. ${ctx} FORMAT: JSON uniquement.`;
-    const userMessage = `Analyse: Prenom: ${params.prenom}, RIASEC: ${params.profil_riasec}, Score: ${params.score_global}/100, Aptitudes: ${params.score_aptitudes}/100, Niveau: ${params.niveau_etude}, District: ${params.district}, Age: ${params.age} ans. JSON: { resume_profil, points_forts, points_amelioration, metiers_recommandes: [{titre, raison, employeurs_ci, salaire_moyen}], filiere_recommandee, message_motivation }`;
+
+    // Référentiels réels YIRA CI — 42 filières · 33 établissements
+    const RIASEC_FILIERES: Record<string, string[]> = {
+      R: ['Mécanique Automobile', 'Électricité Bâtiment', 'Bâtiment Chantier Gros Œuvres', 'Construction Mécanique', 'Menuiserie Charpente', 'Froid et Climatisation', 'Topographie', 'Génie civil', 'Maintenance Mécanique'],
+      I: ['Électronique', 'Électrotechnique', 'Biochimie', 'Maths et Technique', 'Sciences Médico-sociales', 'Maintenance des Équipements Électriques'],
+      A: ['Décoration Textile', 'Imprimerie', 'Peinture Bâtiment'],
+      S: ['Sciences Médico-sociales', 'Techniques Hôtelières', 'Cuisine Professionnelle', 'TC Génie Alimentaire'],
+      E: ['Comptabilité', 'Comptabilité-Commerce', 'Transit-Transport', 'Techniques Quantitatives de Gestion'],
+      C: ['Secrétariat Bureautique', 'Techniques Administratives et Bureautiques', 'Métreur Gros Œuvres'],
+    };
+
+    const ETABS_PAR_VILLE: Record<string, string[]> = {
+      'Abidjan': ['LTA Cocody', 'CPM BAT Koumassi', 'CPM Auto Vridi', 'CETC Treichville', 'LPC Yopougon', 'CBCG Treichville', 'CELIA Treichville', 'LTY Yopougon', 'CHA Koumassi', 'CPM Bois Koumassi'],
+      'Bouaké': ['CET Bouaké', 'CBCG Bouaké', 'CETF Bouaké'],
+      'San-Pédro': ['LP San-Pedro', 'Lycée Professionnel San-Pedro'],
+      'Daloa': ['CBCG Daloa'],
+      'Gagnoa': ['Lycée Professionnel de Gagnoa'],
+      'Korhogo': ['Lycée Professionnel Korhogo'],
+    };
+
+    const riasecCode = (params.profil_riasec || 'R').charAt(0).toUpperCase();
+    const filieresCompatibles = (RIASEC_FILIERES[riasecCode] || RIASEC_FILIERES['R']).slice(0, 5).join(', ');
+    const districtKey = Object.keys(ETABS_PAR_VILLE).find(k => k.toLowerCase().includes((params.district || 'abidjan').toLowerCase())) || 'Abidjan';
+    const etabsProches = (ETABS_PAR_VILLE[districtKey] || ETABS_PAR_VILLE['Abidjan']).slice(0, 5).join(', ');
+
+    const systemPrompt = `Tu es le NIE YIRA, expert orientation scolaire en Côte d'Ivoire. ${ctx}
+Tu DOIS recommander des filières et établissements RÉELS et PRÉCIS. Jamais de généralités.
+FORMAT OBLIGATOIRE: JSON uniquement, sans texte avant ou après.`;
+
+    const userMessage = `Profil: ${params.prenom}, RIASEC ${riasecCode}, score ${params.score_global}/100, niveau ${params.niveau_etude}, district ${params.district}, age ${params.age} ans.
+
+FILIÈRES COMPATIBLES RIASEC ${riasecCode}: ${filieresCompatibles}
+ÉTABLISSEMENTS PROCHES DE ${params.district}: ${etabsProches}
+
+JSON REQUIS:
+{
+  "resume_profil": {"analyse": "...", "riasec_dominant": "${riasecCode}", "points_forts": ["...","...","..."]},
+  "orientation_scolaire": {
+    "filiere_1": {"nom": "FILIÈRE EXACTE DE LA LISTE", "pourquoi": "...", "diplome_entree": "BEPC ou BAC", "diplome_sortie": "BT ou CQP", "etablissements_ci": [{"nom": "NOM EXACT ÉTABLISSEMENT", "ville": "VILLE CI", "contact": "si connu"}], "duree": "X mois", "financement_fdfp": "70-80%"},
+    "filiere_2": {"nom": "AUTRE FILIÈRE DE LA LISTE", "pourquoi": "...", "diplome_entree": "...", "diplome_sortie": "...", "etablissements_ci": [{"nom": "...", "ville": "..."}], "duree": "...", "financement_fdfp": "..."}
+  },
+  "plan_action": [{"etape": 1, "action": "...", "delai": "Semaine 1"}, {"etape": 2, "action": "...", "delai": "Semaine 2-3"}],
+  "message_motivation": {"contenu": "Message personnalisé pour ${params.prenom}..."}
+}`;
+
     return this.appelNIE(systemPrompt, userMessage);
   }
 
