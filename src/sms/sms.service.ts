@@ -52,7 +52,7 @@ export class SmsService {
 
   async envoyerCodeYira(tel: string, prenom: string, codeYira: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Bienvenue ${prenom} ! Votre code YIRA est ${codeYira}. Conservez-le precieusement. Commencez votre evaluation sur evaluations.yira-ci.com`
+      `YIRA-CI: Bienvenue ${prenom} ! Votre code YIRA est ${codeYira}. Conservez-le precieusement. Commencez votre evaluation sur orientations.yira-ci.com`
     );
   }
 
@@ -100,14 +100,14 @@ export class SmsService {
 
   async envoyerRappelQuiz(tel: string, prenom: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Bonjour ${prenom} ! Le quiz du jour vous attend. Gagnez vos points: evaluations.yira-ci.com ou *7572#`
+      `YIRA-CI: Bonjour ${prenom} ! Le quiz du jour vous attend. Gagnez vos points: orientations.yira-ci.com ou *7572#`
     );
   }
 
   // ── USSD Réponse courte ──────────────────────────────────────
   async envoyerResultatUSSD(tel: string, prenom: string, profil: string, score: number) {
     return this.envoyer(tel,
-      `YIRA-CI: ${prenom}, votre profil RIASEC est ${profil} (score ${score}/100). Votre rapport complet est disponible sur evaluations.yira-ci.com`
+      `YIRA-CI: ${prenom}, votre profil RIASEC est ${profil} (score ${score}/100). Votre rapport complet est disponible sur orientations.yira-ci.com`
     );
   }
 

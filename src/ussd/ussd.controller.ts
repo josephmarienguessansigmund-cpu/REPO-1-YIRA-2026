@@ -64,7 +64,7 @@ export class UssdController {
         // Envoyer SMS confirmation
         await this.sms.envoyerCodeYira(phoneNumber, s.prenom, code);
 
-        reponse = 'END Inscription reussie !\nBonjour ' + s.prenom + ' !\nCode YIRA: ' + code + '\nSMS envoye. Accedez a:\nevaluations.yira-ci.com';
+        reponse = 'END Inscription reussie !\nBonjour ' + s.prenom + ' !\nCode YIRA: ' + code + '\nSMS envoye. Accedez a:\norientations.yira-ci.com';
         continuer = false;
       }
 
@@ -82,7 +82,7 @@ export class UssdController {
         if (dernier === s.otp) {
           reponse = 'CON Connexion reussie !\nBonjour !\n\n1. Mon profil\n2. Mon evaluation\n3. Mes resultats\n4. Quitter';
         } else {
-          reponse = 'END Code incorrect.\nReessayez ou allez sur:\nevaluations.yira-ci.com';
+          reponse = 'END Code incorrect.\nReessayez ou allez sur:\norientations.yira-ci.com';
           continuer = false;
         }
       }
@@ -99,7 +99,7 @@ export class UssdController {
           '4. Je ne sais pas';
       } else if (etape === 2) {
         if (dernier === '1') {
-          reponse = 'END Bravo ! +15 points YIRA\nFDFP = Fonds de Developpement de la Formation Professionnelle.\nVos points sont credites.\nevaluations.yira-ci.com';
+          reponse = 'END Bravo ! +15 points YIRA\nFDFP = Fonds de Developpement de la Formation Professionnelle.\nVos points sont credites.\norientations.yira-ci.com';
         } else {
           reponse = 'END Dommage ! La bonne reponse:\nFDFP = Fonds de Developpement de la Formation Professionnelle.\nReessayez demain.\n+0 points';
         }
@@ -108,7 +108,7 @@ export class UssdController {
 
     // ── MES RÉSULTATS ────────────────────────────────────────
     } else if (inputs[0] === '4') {
-      reponse = 'END Vos resultats YIRA\nProfil: En attente evaluation\nScore: -/100\n\nPassez votre evaluation sur:\nevaluations.yira-ci.com\nou revenez apres evaluation.';
+      reponse = 'END Vos resultats YIRA\nProfil: En attente evaluation\nScore: -/100\n\nPassez votre evaluation sur:\norientations.yira-ci.com\nou revenez apres evaluation.';
       continuer = false;
 
     // ── CONTACTER CONSEILLER ─────────────────────────────────
