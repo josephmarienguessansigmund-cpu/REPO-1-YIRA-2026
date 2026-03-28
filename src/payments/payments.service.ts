@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+// On utilise require car le SDK FedaPay n'a pas toujours de types TS parfaits
 const FedaPay = require('fedapay');
 
 @Injectable()
@@ -7,28 +8,28 @@ export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
   constructor(private configService: ConfigService) {
-    // On récupère la clé secrète depuis Railway
-    const apiKey = this.configService.get<string>('FEDAPAY_SECRET_KEY');
-    FedaPay.FedaPay.setApiKey(apiKey);
-    FedaPay.FedaPay.setEnvironment('sandbox'); // Mettre 'live' pour la production réelle
+    // On s'assure d'utiliser la clé SECRÈTE (sk_...)
+    const secretKey = this.configService.get<string>('FEDAPAY_SECRET_KEY');
+    FedaPay.FedaPay.setApiKey(secretKey);
+    FedaPay.FedaPay.setEnvironment('sandbox'); // Gardez 'sandbox' pour vos tests actuels
   }
 
   async creerLienBilan(user: any, montant: number, niveau: string) {
     try {
-      this.logger.log(`Génération FedaPay pour ${user.email} - ${montant} FCFA`);
-      
+      this.logger.log(`Demande FedaPay : ${user.email} | ${montant} FCFA`);
+
       const transaction = await FedaPay.Transaction.create({
         description: `Bilan NIE YIRA - Niveau ${niveau}`,
         amount: montant,
-        currency: { iso: 'XOF' },
+        currency: { iso: 'XOF' }, // Toujours XOF pour la Côte d'Ivoire
         callback_url: 'https://yira-api-production.up.railway.app/api/v1/payments/callback',
         customer: {
-          firstname: user.nom,
+          firstname: user.nom || 'Client',
           lastname: 'YIRA',
           email: user.email,
           phone_number: {
             number: user.tel,
-            country: 'ci'
+            country: 'ci' // Code pays CI pour FedaPay
           }
         }
       });
