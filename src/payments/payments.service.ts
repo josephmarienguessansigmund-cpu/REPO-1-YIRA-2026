@@ -8,14 +8,26 @@ export class PaymentsService {
 
   constructor() {
     FedaPay.setApiKey(process.env.FEDAPAY_SECRET_KEY);
-    FedaPay.setEnvironment('sandbox'); 
+    FedaPay.setEnvironment('sandbox'); // Passer à 'live' pour la mise en production officielle
   }
 
-  async creerLienBilan(userData: { nom: string; email: string; tel: string }) {
+  /**
+   * Génère un lien de paiement personnalisé
+   * @param userData Infos du jeune (Nom, Email, Tel)
+   * @param montant Le prix choisi (ex: 2000, 5000, 10000)
+   * @param niveau Le niveau d'inculturation (N1, N2, N3) pour la description
+   */
+  async creerLienBilan(
+    userData: { nom: string; email: string; tel: string }, 
+    montant: number, 
+    niveau: string = 'N2'
+  ) {
     try {
+      this.logger.log(`Création lien FedaPay pour ${userData.nom} - Niveau ${niveau} - Montant: ${montant} FCFA`);
+
       const transaction = await Transaction.create({
-        description: 'Achat Bilan NIE - YIRA',
-        amount: 5000, // Le montant pour Nohama Consulting est fixé ici
+        description: `Bilan NIE YIRA - Niveau ${niveau} - ${userData.nom}`,
+        amount: montant, // Le montant est désormais flexible
         currency: { iso: 'XOF' },
         callback_url: 'https://orientations.yira-ci.com/dashboard',
         customer: {
@@ -26,9 +38,12 @@ export class PaymentsService {
       });
 
       const token = await transaction.generateToken();
-      return { url: token.url };
+      return { 
+        url: token.url,
+        transactionId: transaction.id // Utile pour le suivi dans Supabase
+      };
     } catch (error) {
-      this.logger.error(`Erreur FedaPay: ${error.message}`);
+      this.logger.error(`Erreur FedaPay : ${error.message}`);
       throw error;
     }
   }
