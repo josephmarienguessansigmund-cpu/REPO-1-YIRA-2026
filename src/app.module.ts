@@ -9,6 +9,7 @@ import { SmsModule } from './sms/sms.module';
 import { IaModule } from './ia/ia.module';
 import { AdminModule } from './admin/admin.module';
 import { CarteModule } from './carte/carte.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -23,6 +24,13 @@ import { CarteModule } from './carte/carte.module';
     IaModule,
     AdminModule,
     CarteModule,
+
+@Module({
+  controllers: [PaymentsController],
+  providers: [PaymentsService],
+  exports: [PaymentsService],
+})
+export class PaymentsModule {}
   ],
   controllers: [AppController],
   providers: [AppService],
