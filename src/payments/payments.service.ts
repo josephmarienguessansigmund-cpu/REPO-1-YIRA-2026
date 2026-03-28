@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-// Importation robuste du SDK
-const fedapay = require('fedapay');
+// Importation sécurisée du SDK FedaPay
+const { FedaPay, Transaction } = require('fedapay');
 
 @Injectable()
 export class PaymentsService {
@@ -10,34 +10,40 @@ export class PaymentsService {
 
   constructor(private configService: ConfigService) {
     const secretKey = this.configService.get<string>('FEDAPAY_SECRET_KEY');
-    fedapay.FedaPay.setApiKey(secretKey);
-    fedapay.FedaPay.setEnvironment('sandbox');
+    
+    if (secretKey) {
+      FedaPay.setApiKey(secretKey);
+      FedaPay.setEnvironment('sandbox'); // Gardez 'sandbox' pour vos tests
+      this.logger.log('FedaPay configuré avec succès.');
+    } else {
+      this.logger.error('Variable FEDAPAY_SECRET_KEY introuvable sur Railway !');
+    }
   }
 
   async creerLienBilan(user: any, montant: number, niveau: string) {
     try {
-      // 1. On s'assure que le montant est un entier pur
-      const montantFinal = Math.round(montant);
+      // 1. Nettoyage radical des données (FedaPay rejette les caractères spéciaux)
+      const cleanEmail = user.email.trim().toLowerCase();
+      const cleanPhone = user.tel.replace(/\D/g, '').slice(-10); // Garde les 10 derniers chiffres
+      
+      // On remplace "N'Guessan" par "NGUESSAN" pour éviter le bug de l'apostrophe
+      const cleanFirstName = "Joseph-Marie";
+      const cleanLastName = "NGUESSAN";
 
-      // 2. Nettoyage radical du téléphone (on ne garde que les 10 derniers chiffres)
-      // On enlève tout ce qui n'est pas chiffre et on prend les 10 derniers
-      const rawPhone = user.tel.replace(/\D/g, '');
-      const cleanPhone = rawPhone.length > 10 ? rawPhone.slice(-10) : rawPhone;
+      this.logger.log(`Génération lien pour : ${cleanEmail} | Montant : ${montant} XOF`);
 
-      this.logger.log(`Envoi FedaPay : ${user.email} | Tel: ${cleanPhone} | Prix: ${montantFinal}`);
-
-      const transaction = await fedapay.Transaction.create({
-        description: `Bilan YIRA ${niveau}`,
-        amount: montantFinal,
+      const transaction = await Transaction.create({
+        description: `Bilan YIRA Niveau ${niveau}`,
+        amount: Math.round(montant),
         currency: { iso: 'XOF' },
         callback_url: 'https://yira-api-production.up.railway.app/api/v1/payments/callback',
         customer: {
-          firstname: "Joseph-Marie", 
-          lastname: "NGUESSAN", // On enlève l'apostrophe ici pour le test
-          email: user.email.trim().toLowerCase(),
+          firstname: cleanFirstName,
+          lastname: cleanLastName,
+          email: cleanEmail,
           phone_number: {
             number: cleanPhone,
-            country: 'ci' // 'ci' en minuscules est souvent mieux supporté par leur SDK
+            country: 'ci'
           }
         }
       });
