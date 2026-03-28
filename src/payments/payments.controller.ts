@@ -1,18 +1,15 @@
-import { Controller, Post, Body, Get } from '@nestjs/common'; // On ajoute "Get"
-import { PaymentsService } from './payments.service';
+// Dans src/payments/payments.controller.ts
 
-@Controller('payments')
-export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+@Post('generer-lien')
+async genererLien(@Body() body: any) {
+  const { user, education_level } = body;
 
-  // Cette partie permet de tester le lien directement dans le navigateur
-  @Get()
-  checkHealth() {
-    return { status: "OK", message: "Le module de paiement est prêt et actif" };
-  }
+  // LOGIQUE DE PRIX NOHAMA CONSULTING
+  let montant = 5000; // Prix par défaut (N2)
+  
+  if (education_level === 'N1') montant = 2000;  // Prix Social / Insertion
+  if (education_level === 'N3') montant = 10000; // Prix Expert / Cadre
 
-  @Post('checkout')
-  async checkout(@Body() data: any) {
-    return await this.paymentsService.creerLienBilan(data);
-  }
+  // On appelle votre nouveau service dynamique
+  return await this.paymentsService.creerLienBilan(user, montant, education_level);
 }
