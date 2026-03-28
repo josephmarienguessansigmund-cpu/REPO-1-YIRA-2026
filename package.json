@@ -26,7 +26,8 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
-    "xml2js": "^0.6.0"
+    "xml2js": "^0.6.0",
+    "fedapay": "^1.1.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
