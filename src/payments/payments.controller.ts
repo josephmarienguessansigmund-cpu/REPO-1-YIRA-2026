@@ -1,14 +1,18 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common'; // On ajoute "Get"
 import { PaymentsService } from './payments.service';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
+  // Cette partie permet de tester le lien directement dans le navigateur
+  @Get()
+  checkHealth() {
+    return { status: "OK", message: "Le module de paiement est prêt et actif" };
+  }
+
   @Post('checkout')
-  async checkout(@Body() data: { nom: string; email: string; tel: string }) {
-    // Cette route sera appelée par votre bouton "Payer" sur orientations.yira-ci.com
-    // Elle envoie les infos du jeune (nom, email, tel) à FedaPay
+  async checkout(@Body() data: any) {
     return await this.paymentsService.creerLienBilan(data);
   }
 }
