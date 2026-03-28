@@ -1,17 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { IaModule } from './ia/ia.module';
-import { PaymentsModule } from './payments/payments.module'; // <-- DOIT ÊTRE ICI
-import { ConfigModule } from '@nestjs/config';
+import { PaymentsService } from './payments.service';
+import { PaymentsController } from './payments.controller';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    IaModule,
-    PaymentsModule, // <-- ET DOIT ÊTRE AJOUTÉ ICI
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [PaymentsController],
+  providers: [PaymentsService],
+  exports: [PaymentsService],
 })
-export class AppModule {}
+export class PaymentsModule {}
