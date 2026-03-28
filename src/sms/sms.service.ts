@@ -92,6 +92,30 @@ export class SmsService {
     );
   }
 
+  async envoyerS1Inscription(tel: string, prenom: string, codeYira: string) {
+    return this.envoyer(tel,
+      `YIRA-CI: Bienvenue ${prenom} ! Votre inscription est confirmee. Votre code YIRA est ${codeYira}. Commencez votre parcours sur orientations.yira-ci.com`
+    );
+  }
+
+  async envoyerS3EvalTerminee(tel: string, prenom: string) {
+    return this.envoyer(tel,
+      `YIRA-CI: Bravo ${prenom} ! Votre evaluation est terminee. Vos resultats sont en cours d'analyse. Vous serez notifie(e) tres prochainement.`
+    );
+  }
+
+  async envoyerS7ResultatCQP(tel: string, prenom: string, filiere: string, codeYira: string) {
+    return this.envoyer(tel,
+      `YIRA-CI: Felicitations ${prenom} ! Vous avez obtenu votre CQP en ${filiere}. Code YIRA: ${codeYira}. Consultez votre certificat sur orientations.yira-ci.com`
+    );
+  }
+
+  async envoyerS8Embauche(tel: string, prenom: string, employeur: string, poste: string) {
+    return this.envoyer(tel,
+      `YIRA-CI: Felicitations ${prenom} ! Vous avez ete embauche(e) comme ${poste} chez ${employeur}. Toute l'equipe YIRA vous felicite pour cette reussite !`
+    );
+  }
+
   async envoyerAlerteConseiller(telConseiller: string, prenomBenef: string, alerte: string) {
     return this.envoyer(telConseiller,
       `YIRA-CI [ALERTE]: ${prenomBenef} - ${alerte}. Veuillez le/la contacter rapidement.`
