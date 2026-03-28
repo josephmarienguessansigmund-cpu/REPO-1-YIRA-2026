@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-// Importation sécurisée du SDK
-const FedaPay = require('fedapay').FedaPay;
-const Transaction = require('fedapay').Transaction;
+// Importation robuste du SDK
+const fedapay = require('fedapay');
 
 @Injectable()
 export class PaymentsService {
@@ -11,33 +10,34 @@ export class PaymentsService {
 
   constructor(private configService: ConfigService) {
     const secretKey = this.configService.get<string>('FEDAPAY_SECRET_KEY');
-    
-    if (secretKey) {
-      this.logger.log(`Clé FedaPay configurée (commence par : ${secretKey.substring(0, 7)})`);
-      FedaPay.setApiKey(secretKey);
-      FedaPay.setEnvironment('sandbox'); // Garder sandbox pour les tests
-    } else {
-      this.logger.error("ALERTE : La variable FEDAPAY_SECRET_KEY est manquante sur Railway !");
-    }
+    fedapay.FedaPay.setApiKey(secretKey);
+    fedapay.FedaPay.setEnvironment('sandbox');
   }
 
   async creerLienBilan(user: any, montant: number, niveau: string) {
     try {
-      this.logger.log(`Création transaction pour : ${user.email}`);
+      // 1. On s'assure que le montant est un entier pur
+      const montantFinal = Math.round(montant);
 
-      const transaction = await Transaction.create({
+      // 2. Nettoyage radical du téléphone (on ne garde que les 10 derniers chiffres)
+      // On enlève tout ce qui n'est pas chiffre et on prend les 10 derniers
+      const rawPhone = user.tel.replace(/\D/g, '');
+      const cleanPhone = rawPhone.length > 10 ? rawPhone.slice(-10) : rawPhone;
+
+      this.logger.log(`Envoi FedaPay : ${user.email} | Tel: ${cleanPhone} | Prix: ${montantFinal}`);
+
+      const transaction = await fedapay.Transaction.create({
         description: `Bilan YIRA ${niveau}`,
-        amount: montant,
+        amount: montantFinal,
         currency: { iso: 'XOF' },
         callback_url: 'https://yira-api-production.up.railway.app/api/v1/payments/callback',
         customer: {
-          firstname: user.nom || 'Joseph',
-          lastname: 'N\'Guessan',
-          email: user.email.trim(),
-          // Format simplifié pour éviter les erreurs de validation
+          firstname: "Joseph-Marie", 
+          lastname: "NGUESSAN", // On enlève l'apostrophe ici pour le test
+          email: user.email.trim().toLowerCase(),
           phone_number: {
-            number: user.tel.replace(/\s+/g, ''), // Supprime les espaces
-            country: 'ci'
+            number: cleanPhone,
+            country: 'ci' // 'ci' en minuscules est souvent mieux supporté par leur SDK
           }
         }
       });
