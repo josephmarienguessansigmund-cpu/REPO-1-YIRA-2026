@@ -18,12 +18,16 @@ export class SmsController {
 
     switch (type) {
       case 'SP1':
-      case 'S1':
         await this.smsService.envoyerCodeYira(telephone, prenom, params?.code_yira || '');
         break;
+      case 'S1':
+        await this.smsService.envoyerS1Inscription(telephone, prenom, params?.code_yira || '');
+        break;
       case 'SP2':
-      case 'S3':
         await this.smsService.envoyerSP2Parents(telephone, prenom);
+        break;
+      case 'S3':
+        await this.smsService.envoyerS3EvalTerminee(telephone, prenom);
         break;
       case 'SP3':
         await this.smsService.envoyerSP3Formation(telephone, prenom, params?.etablissement || '');
@@ -32,8 +36,13 @@ export class SmsController {
         await this.smsService.envoyerSP4Inactivite(telephone, prenom);
         break;
       case 'SP5':
-      case 'S8':
         await this.smsService.envoyerSP5Insertion(telephone, prenom, params?.poste || '', params?.employeur || '');
+        break;
+      case 'S7':
+        await this.smsService.envoyerS7ResultatCQP(telephone, prenom, params?.filiere || '', params?.code_yira || '');
+        break;
+      case 'S8':
+        await this.smsService.envoyerS8Embauche(telephone, prenom, params?.employeur || '', params?.poste || '');
         break;
       case 'OTP':
         const otp = this.smsService.genererOTP();
@@ -46,7 +55,7 @@ export class SmsController {
         await this.smsService.envoyerAlerteConseiller(telephone, prenom, params?.alerte || '');
         break;
       default:
-        return { message: 'Type SMS invalide', types_valides: ['SP1','SP2','SP3','SP4','SP5','OTP','QUIZ','ALERTE'] };
+        return { message: 'Type SMS invalide', types_valides: ['SP1','S1','SP2','S3','SP3','SP4','SP5','S7','S8','OTP','QUIZ','ALERTE'] };
     }
 
     return {
