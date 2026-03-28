@@ -1,47 +1,40 @@
 import { Injectable, Logger } from '@nestjs/common';
-// @ts-ignore
-const { FedaPay, Transaction } = require('fedapay');
+import { ConfigService } from '@nestjs/config';
+const FedaPay = require('fedapay');
 
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
-  constructor() {
-    FedaPay.setApiKey(process.env.FEDAPAY_SECRET_KEY);
-    FedaPay.setEnvironment('sandbox'); // Passer à 'live' pour la mise en production officielle
+  constructor(private configService: ConfigService) {
+    // On récupère la clé secrète depuis Railway
+    const apiKey = this.configService.get<string>('FEDAPAY_SECRET_KEY');
+    FedaPay.FedaPay.setApiKey(apiKey);
+    FedaPay.FedaPay.setEnvironment('sandbox'); // Mettre 'live' pour la production réelle
   }
 
-  /**
-   * Génère un lien de paiement personnalisé
-   * @param userData Infos du jeune (Nom, Email, Tel)
-   * @param montant Le prix choisi (ex: 2000, 5000, 10000)
-   * @param niveau Le niveau d'inculturation (N1, N2, N3) pour la description
-   */
-  async creerLienBilan(
-    userData: { nom: string; email: string; tel: string }, 
-    montant: number, 
-    niveau: string = 'N2'
-  ) {
+  async creerLienBilan(user: any, montant: number, niveau: string) {
     try {
-      this.logger.log(`Création lien FedaPay pour ${userData.nom} - Niveau ${niveau} - Montant: ${montant} FCFA`);
-
-      const transaction = await Transaction.create({
-        description: `Bilan NIE YIRA - Niveau ${niveau} - ${userData.nom}`,
-        amount: montant, // Le montant est désormais flexible
+      this.logger.log(`Génération FedaPay pour ${user.email} - ${montant} FCFA`);
+      
+      const transaction = await FedaPay.Transaction.create({
+        description: `Bilan NIE YIRA - Niveau ${niveau}`,
+        amount: montant,
         currency: { iso: 'XOF' },
-        callback_url: 'https://orientations.yira-ci.com/dashboard',
+        callback_url: 'https://yira-api-production.up.railway.app/api/v1/payments/callback',
         customer: {
-          firstname: userData.nom,
-          email: userData.email,
-          phone_number: { number: userData.tel, country: 'CI' }
+          firstname: user.nom,
+          lastname: 'YIRA',
+          email: user.email,
+          phone_number: {
+            number: user.tel,
+            country: 'ci'
+          }
         }
       });
 
       const token = await transaction.generateToken();
-      return { 
-        url: token.url,
-        transactionId: transaction.id // Utile pour le suivi dans Supabase
-      };
+      return { url: token.url };
     } catch (error) {
       this.logger.error(`Erreur FedaPay : ${error.message}`);
       throw error;
