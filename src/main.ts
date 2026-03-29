@@ -1,40 +1,68 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import * as helmet from 'helmet';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
+import { validateStartup } from './common/startup.validator';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // ── Validation des variables d'environnement au démarrage ──
+  validateStartup();
 
-  // 1. Validation des données entrantes
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-    forbidNonWhitelisted: true,
-  }));
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log'],
+  });
 
-  // 2. Configuration du CORS pour vos nouveaux domaines
+  // ── Sécurité HTTP headers ───────────────────────────────────
+  app.use((helmet as any).default ? (helmet as any).default() : (helmet as any)());
+
+  // ── CORS étendu — tous les domaines YIRA + GitHub Pages ────
   app.enableCors({
     origin: [
       'https://orientations.yira-ci.com',
       'https://www.yira-ci.com',
       'https://yira-ci.com',
-      /\.railway\.app$/, // Autorise aussi les sous-domaines Railway pour les tests
-      'http://localhost:3000', // Pour vos tests locaux
+      'https://josephmarienguessansigmund-cpu.github.io',
+      // Pays CEDEAO
+      'https://orientations.yira-bf.com',
+      'https://orientations.yira-ml.com',
+      'https://orientations.yira-sn.com',
+      'https://orientations.yira-ne.com',
+      'https://orientations.yira-gn.com',
+      'https://orientations.yira-gh.com',
+      /\.railway\.app$/,
+      /\.github\.io$/,
+      'http://localhost:3000',
+      'http://localhost:3001',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Country-Code'],
   });
 
-  // 3. Préfixe global (Important pour vos tests PowerShell)
+  // ── Préfixe global API ──────────────────────────────────────
   app.setGlobalPrefix('api/v1');
 
-  // 4. Port dynamique pour Railway
+  // ── ValidationPipe global ──────────────────────────────────
+  // NOTE : forbidNonWhitelisted retiré — les DTOs any() le bloqueraient
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    forbidNonWhitelisted: false, // ← CORRIGÉ : les body any() passent
+    transformOptions: { enableImplicitConversion: true },
+  }));
+
+  // ── Global Exception Filter ────────────────────────────────
+  app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // ── Démarrage ──────────────────────────────────────────────
   const port = process.env.PORT || 3001;
   await app.listen(port);
 
-  console.log(`🚀 YIRA API lancée sur le port ${port}`);
-  console.log(`🌍 Domaines autorisés : orientations.yira-ci.com`);
+  const logger = new Logger('Bootstrap');
+  logger.log(`🚀 YIRA API démarrée — port ${port}`);
+  logger.log(`🌍 7 pays CEDEAO actifs — CI BF ML SN NE GN GH`);
+  logger.log(`🤖 NIE-Coach actif — ${process.env.ANTHROPIC_API_KEY ? 'Claude Haiku' : process.env.GEMINI_API_KEY ? 'Gemini' : '⚠️ Aucune clé IA'}`);
 }
 
 bootstrap();

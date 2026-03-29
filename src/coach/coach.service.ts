@@ -359,4 +359,96 @@ RAPPEL : Tu es le Coach YIRA. Ne réponds qu'aux sujets liés à l'orientation, 
     const n3 = msgs.filter(m => m.niveau === 'N3').length;
     return { messages_30j: users, tokens_30j: tokens, flags_30j: flags, niveaux: { N1: n1, N2: n2, N3: n3 } };
   }
+
+  // ── Batch inculturation avec reprise sur erreur ──────────────
+  async inculturerBatch(items: Array<{id: string; text: string}>, niveaux: string[]): Promise<{
+    done: number; errors: number; skipped: number; results: any[];
+  }> {
+    let done = 0, errors = 0, skipped = 0;
+    const results: any[] = [];
+
+    for (const item of items) {
+      for (const niveau of niveaux) {
+        // Vérifier si déjà traité (reprise sans recommencer)
+        try {
+          const { data: exists } = await this.supabase
+            .from('yira_inculturation_mapping')
+            .select('adapted_text')
+            .eq('sigmund_id', item.id)
+            .eq('education_level', niveau)
+            .single();
+
+          if (exists?.adapted_text) {
+            skipped++;
+            continue; // Déjà fait — on passe
+          }
+        } catch { /* Non trouvé — continuer */ }
+
+        // Générer avec retry 2 fois
+        let success = false;
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            // Appel direct Supabase + IA (même logique que inculturerQuestion)
+            const systemPrompt = `Tu es l'Expert en Inculturation Psychométrique de Nohama Consulting CI. Adapte cet item pour un niveau ${niveau} en français ivoirien professionnel sans changer le sens psychologique. Réponds UNIQUEMENT par la phrase adaptée.`;
+            const phraseAdaptee = await this.appelCoach(
+              [{ role: 'user', content: `Adapte: "${item.text}"` }],
+              systemPrompt
+            ).then(r => r.texte);
+            await this.supabase.from('yira_inculturation_mapping').upsert({
+              sigmund_id: item.id, original_text: item.text,
+              adapted_text: phraseAdaptee.trim(), education_level: niveau,
+              is_expert_validated: false,
+            }, { onConflict: 'sigmund_id,education_level' });
+            done++;
+            results.push({ id: item.id, niveau, status: 'ok' });
+            success = true;
+            break;
+          } catch (e) {
+            if (attempt === 2) {
+              errors++;
+              results.push({ id: item.id, niveau, status: 'error', error: e.message });
+              this.logger.warn(`Batch erreur: ${item.id} (${niveau}) — ${e.message}`);
+            } else {
+              await new Promise(res => setTimeout(res, 1000)); // Attendre 1s avant retry
+            }
+          }
+        }
+      }
+    }
+
+    return { done, errors, skipped, results };
+  }
+
+  // ── Calcul scores RIASEC — service pur testable ──────────────
+  static calculerScoresRIASEC(reponses: Array<{lettre: string; valeur: number}>): Record<string, number> {
+    const scores: Record<string, number> = { R:0, I:0, A:0, S:0, E:0, C:0 };
+    const counts: Record<string, number> = { R:0, I:0, A:0, S:0, E:0, C:0 };
+
+    for (const r of reponses) {
+      const l = r.lettre?.toUpperCase();
+      if (l && l in scores) {
+        // Validation bornes : score entre 0 et 100
+        const valeur = Math.max(0, Math.min(100, r.valeur || 0));
+        scores[l] += valeur;
+        counts[l]++;
+      }
+    }
+
+    // Normaliser : moyenne sur le nombre de réponses par lettre
+    for (const l of Object.keys(scores)) {
+      scores[l] = counts[l] > 0 ? Math.round(scores[l] / counts[l]) : 0;
+    }
+
+    return scores;
+  }
+
+  // ── Profil dominant depuis scores ───────────────────────────
+  static getProfilDominant(scores: Record<string, number>): string {
+    return Object.entries(scores)
+      .sort(([,a],[,b]) => b - a)
+      .slice(0, 3)
+      .map(([l]) => l)
+      .join('');
+  }
+
 }
