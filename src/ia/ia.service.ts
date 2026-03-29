@@ -94,11 +94,14 @@ RÈGLES ABSOLUES:
   // ── CONTEXTE PAYS ─────────────────────────────────────────
   private getContextePays(country_code: string, langue: string): string {
     const contextes: Record<string, Record<string, string>> = {
-      CI: { fr: `Tu travailles pour la Côte d'Ivoire. Marché emploi: BTP, commerce, agro-industrie, telecom, finance, hotellerie. Employeurs: Orange CI, MTN CI, CFAO, SG CI, UBA CI, ANADER. Districts: Abidjan, Yamoussoukro, Bouaké, San-Pédro, Korhogo, Man, Daloa. Monnaie: FCFA. Certifications: CQP RNCCI. Ministères: METFPA, MENET, DGFP, FDFP.` },
-      SN: { fr: `Tu travailles pour le Sénégal. Marché emploi: pêche, agriculture, tourisme, telecom, BTP. Monnaie: FCFA.` },
-      BF: { fr: `Tu travailles pour le Burkina Faso. Marché emploi: agriculture, mines, artisanat, telecom. Monnaie: FCFA.` },
-      GH: { en: `You work for Ghana. Job market: oil & gas, agriculture, fintech, telecom. Currency: GHS.` },
-      NG: { en: `You work for Nigeria. Job market: oil & gas, fintech, agriculture, tech. Currency: NGN.` },
+      CI: { fr: `Tu travailles pour la Côte d'Ivoire. Marché emploi: BTP, commerce, agro-industrie, telecom, finance, hotellerie. Employeurs: Orange CI, MTN CI, CFAO, SG CI, UBA CI, ANADER. Districts: Abidjan, Yamoussoukro, Bouaké, San-Pédro, Korhogo, Man, Daloa. Monnaie: FCFA. Certifications: CQP RNCCI. Ministères: METFPA, MENET, DGFP, FDFP. Financement formation: FDFP couvre 70-80%.` },
+      BF: { fr: `Tu travailles pour le Burkina Faso. Marché emploi: agriculture (coton, céréales), mines (or, manganèse), artisanat, BTP, commerce, telecom. Employeurs clés: Orange BF, Moov BF, Coris Bank, SOFITEX, BIB, ONATEL. Régions: Ouagadougou, Bobo-Dioulasso, Koudougou, Banfora, Ouahigouya, Dédougou. Monnaie: FCFA. USSD: *144#. Certifications: CAP, BEP, BT. Ministère: MEFP (Ministère Emploi Formation Professionnelle). Financement: FDFP-BF. Établissements: CFJA Ouagadougou, CFP Bobo-Dioulasso, ENSP, CFP Koudougou. Filières porteuses: Maçonnerie, Mécanique, Électricité, Agriculture, Couture, Informatique.` },
+      ML: { fr: `Tu travailles pour le Mali. Marché emploi: agriculture (coton, mil, riz), mines (or), pêche, BTP, commerce, artisanat, telecom. Employeurs clés: Orange Mali, Moov Mali, BNDA, BDM, CMDT, EDM. Régions: Bamako, Sikasso, Mopti, Ségou, Kayes, Gao, Tombouctou. Monnaie: FCFA. USSD: *145#. Certifications: CAP, BEP, BT. Ministère: MEFP Mali. Financement: FAFPA (Fonds d'Appui à la Formation Professionnelle). Établissements: CFAM Bamako, CFP Sikasso, ITEMA Bamako, CFP Mopti, École des Mines Bamako. Filières porteuses: Agriculture, Mécanique auto, BTP, Commerce, Couture, Pêche.` },
+      SN: { fr: `Tu travailles pour le Sénégal. Marché emploi: pêche, agriculture, tourisme, BTP, numérique, telecom. Employeurs clés: Orange SN, Free SN, CBAO, Ecobank, Sonatel. Régions: Dakar, Thiès, Kaolack, Saint-Louis, Ziguinchor, Diourbel. Monnaie: FCFA. USSD: *155#. Certifications: CAP, BEP, BTS. Financement: 3FPT. Établissements: CFPT Dakar, CFP Thiès, ONFP, ISEP. Filières porteuses: Pêche, Tourisme, Agriculture, BTP, Numérique.` },
+      NE: { fr: `Tu travailles pour le Niger. Marché emploi: agriculture, élevage, mines, BTP, commerce. Employeurs clés: Orange Niger, Airtel Niger, Ecobank, BIA-Niger. Régions: Niamey, Zinder, Maradi, Agadez, Tahoua. Monnaie: FCFA. USSD: *150#. Financement: ANPE-Niger. Établissements: CFP Niamey, IFAIB, CFP Zinder. Filières porteuses: Agriculture, Élevage, BTP, Commerce, Maraîchage.` },
+      GN: { fr: `Tu travailles pour la Guinée. Marché emploi: mines (bauxite, or), agriculture, pêche, BTP, commerce. Employeurs clés: Orange Guinée, MTN Guinée, Ecobank, CBG, SAG. Régions: Conakry, Kindia, Kankan, Labé, N'Zérékoré. Monnaie: GNF. USSD: *151#. Établissements: ENSTP Conakry, CFAD, CFP Kindia. Filières porteuses: Mines, Agriculture, Pêche, BTP.` },
+      GH: { en: `You work for Ghana. Job market: oil & gas, agriculture, fintech, telecom. Key employers: MTN Ghana, Vodafone, GCB Bank. Currency: GHS.` },
+      NG: { en: `You work for Nigeria. Job market: oil & gas, fintech, agriculture, tech. Key employers: MTN Nigeria, Dangote, GTBank. Currency: NGN.` },
     };
     const pays = contextes[country_code];
     if (!pays) return `Pays: ${country_code}. Langue: ${langue}.`;
@@ -108,20 +111,56 @@ RÈGLES ABSOLUES:
   // ── RAPPORT D'ORIENTATION (NIE complet) ──────────────────
   async genererRapportOrientation(params: any): Promise<string> {
     const ctx = this.getContextePays(params.country_code || 'CI', params.langue || 'fr');
-    const RIASEC_FILIERES: Record<string, string[]> = {
-      R: ['Mécanique Automobile', 'Électricité Bâtiment', 'Bâtiment Gros Œuvres', 'Construction Mécanique', 'Menuiserie Charpente', 'Froid et Climatisation', 'Topographie', 'Génie civil'],
-      I: ['Électronique', 'Électrotechnique', 'Biochimie', 'Maths et Technique', 'Sciences Médico-sociales', 'Maintenance Électrique'],
-      A: ['Décoration Textile', 'Imprimerie', 'Peinture Bâtiment'],
-      S: ['Sciences Médico-sociales', 'Techniques Hôtelières', 'Cuisine Professionnelle', 'TC Génie Alimentaire'],
-      E: ['Comptabilité', 'Comptabilité-Commerce', 'Transit-Transport', 'Techniques Quantitatives de Gestion'],
-      C: ['Secrétariat Bureautique', 'Techniques Administratives', 'Métreur Gros Œuvres'],
+    const cc = params.country_code || 'CI';
+    // Référentiels filières par pays
+    const RIASEC_PAR_PAYS: Record<string, Record<string, string[]>> = {
+      CI: {
+        R: ['Mécanique Automobile','Électricité Bâtiment','Bâtiment Gros Œuvres','Construction Mécanique','Menuiserie','Froid et Climatisation','Topographie','Génie civil'],
+        I: ['Électronique','Électrotechnique','Biochimie','Maths Technique','Sciences Médico-sociales','Maintenance Électrique'],
+        A: ['Décoration Textile','Imprimerie','Peinture Bâtiment'],
+        S: ['Sciences Médico-sociales','Techniques Hôtelières','Cuisine Professionnelle'],
+        E: ['Comptabilité','Comptabilité-Commerce','Transit-Transport','Gestion'],
+        C: ['Secrétariat Bureautique','Techniques Administratives','Métreur Gros Œuvres'],
+      },
+      BF: {
+        R: ['Maçonnerie BF','Mécanique Auto BF','Électricité Bâtiment BF','Menuiserie','Soudure','Plomberie','Froid Clim'],
+        I: ['Informatique Bureautique','Maintenance équipements','Électronique'],
+        A: ['Couture Mode BF','Art et Artisanat','Décoration'],
+        S: ['Santé Communautaire','Aide sociale','Restauration'],
+        E: ['Gestion commerciale BF','Commerce général','Transit'],
+        C: ['Secrétariat BF','Comptabilité BF','Gestion d'entreprise'],
+      },
+      ML: {
+        R: ['Mécanique auto Mali','BTP Mali','Génie civil','Agriculture mécanisée','Pêche artisanale','Menuiserie'],
+        I: ['Informatique Mali','Maintenance','Sciences naturelles'],
+        A: ['Bogolan et artisanat','Couture malienne','Arts traditionnels'],
+        S: ['Santé Mali','Enseignement','Agriculture communautaire'],
+        E: ['Commerce Mali','Gestion PME','Négoce'],
+        C: ['Comptabilité Mali','Secrétariat','Administration'],
+      },
     };
-    const ETABS: Record<string, string[]> = {
-      'Abidjan': ['LTA Cocody', 'CPM BAT Koumassi', 'CPM Auto Vridi', 'CETC Treichville', 'CHA Koumassi'],
-      'Bouaké': ['CET Bouaké', 'CBCG Bouaké'],
-      'San-Pédro': ['LP San-Pedro'],
-      'Daloa': ['CBCG Daloa'],
+    const ETABS_PAR_PAYS: Record<string, Record<string, string[]>> = {
+      CI: {
+        'Abidjan': ['LTA Cocody','CPM BAT Koumassi','CPM Auto Vridi','CETC Treichville','CHA Koumassi'],
+        'Bouaké': ['CET Bouaké','CBCG Bouaké'],
+        'San-Pédro': ['LP San-Pedro'],
+        'Daloa': ['CBCG Daloa'],
+      },
+      BF: {
+        'Ouagadougou': ['CFJA Ouagadougou','ENSP Ouaga','Institut des Métiers','CFP Tampouy'],
+        'Bobo-Dioulasso': ['CFP Bobo','Centre Artisanal Bobo','École des Mines Bobo'],
+        'Koudougou': ['CFP Koudougou'],
+        'Banfora': ['CFP Banfora'],
+      },
+      ML: {
+        'Bamako': ['CFAM Bamako','ITEMA Bamako','École des Mines Bamako','CFAM Kalaban Coro'],
+        'Sikasso': ['CFP Sikasso','Centre Agropastoral Sikasso'],
+        'Mopti': ['CFP Mopti','Centre Pêche Mopti'],
+        'Ségou': ['CFP Ségou'],
+      },
     };
+    const RIASEC_FILIERES = RIASEC_PAR_PAYS[cc] || RIASEC_PAR_PAYS['CI'];
+    const ETABS = ETABS_PAR_PAYS[cc] || ETABS_PAR_PAYS['CI'];
     const riasecCode = (params.profil_riasec || 'R').charAt(0).toUpperCase();
     const filieres = (RIASEC_FILIERES[riasecCode] || RIASEC_FILIERES['R']).slice(0, 5).join(', ');
     const districtKey = Object.keys(ETABS).find(k => k.toLowerCase().includes((params.district || 'abidjan').toLowerCase())) || 'Abidjan';
