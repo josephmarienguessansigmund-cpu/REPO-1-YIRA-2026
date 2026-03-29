@@ -49,5 +49,38 @@ export class AuthService {
     if (error) throw new BadRequestException(error.message);
     return { beneficiaire: data, code_yira };
   }
+  async loginAdmin(email: string, password: string) {
+    // Credentials admin depuis les variables d'environnement
+    const adminEmail    = process.env.ADMIN_EMAIL    || 'admin@yira-ci.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'YiraAdmin2026!';
+    const adminNom      = process.env.ADMIN_NOM      || 'Joseph-Marie N'GUESSAN';
+
+    if (email !== adminEmail) {
+      throw new UnauthorizedException('Email admin incorrect');
+    }
+    const valid = password === adminPassword;
+    if (!valid) {
+      throw new UnauthorizedException('Mot de passe admin incorrect');
+    }
+    const token = this.jwtService.sign({
+      sub: 'admin-nohama-001',
+      email: adminEmail,
+      role: 'admin',
+      nom: adminNom,
+      country_code: 'CI',
+    }, { expiresIn: '12h' });
+
+    return {
+      access_token: token,
+      user: {
+        id:    'admin-nohama-001',
+        email: adminEmail,
+        nom:   adminNom,
+        role:  'admin',
+        type:  'admin',
+      }
+    };
+  }
+
 }
 // Fix id 1774303501

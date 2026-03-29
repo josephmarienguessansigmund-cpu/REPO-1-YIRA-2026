@@ -27,8 +27,24 @@ export class AuthController {
     return { message: 'Profil YIRA', utilisateur: req.user };
   }
 
+  @Post('admin/login')
+  async loginAdmin(@Body() dto: { email: string; password: string }) {
+    return this.authService.loginAdmin(dto.email, dto.password);
+  }
+
+  @Post('drh/login')
+  async loginDrh(@Body() dto: { email: string; password: string }) {
+    return this.authService.loginConseiller(dto.email, dto.password);
+  }
+
+  @Post('etat/login')
+  async loginEtat(@Body() dto: { email: string; password: string }) {
+    return this.authService.loginConseiller(dto.email, dto.password);
+  }
+
   @Get('sante')
   sante() {
     return { status: 'ok', service: 'YIRA Auth', timestamp: new Date().toISOString() };
   }
 }
+// This line intentionally left blank
