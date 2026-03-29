@@ -7,6 +7,7 @@ import { SigmundModule } from './sigmund/sigmund.module';
 import { UssdModule } from './ussd/ussd.module';
 import { SmsModule } from './sms/sms.module';
 import { IaModule } from './ia/ia.module';
+import { CoachModule } from './coach/coach.module';
 import { AdminModule } from './admin/admin.module';
 import { CarteModule } from './carte/carte.module';
 import { PaymentsModule } from './payments/payments.module'; // Importation correcte ici
@@ -22,6 +23,7 @@ import { PaymentsModule } from './payments/payments.module'; // Importation corr
     UssdModule,
     SmsModule,
     IaModule,
+    CoachModule,
     AdminModule,
     CarteModule,
     PaymentsModule, // On l'ajoute simplement ici
