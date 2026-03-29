@@ -53,7 +53,7 @@ export class AuthService {
     // Credentials admin depuis les variables d'environnement
     const adminEmail    = process.env.ADMIN_EMAIL    || 'admin@yira-ci.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'YiraAdmin2026!';
-    const adminNom      = process.env.ADMIN_NOM      || 'Joseph-Marie N'GUESSAN';
+    const adminNom      = process.env.ADMIN_NOM      || 'Joseph-Marie N GUESSAN';
 
     if (email !== adminEmail) {
       throw new UnauthorizedException('Email admin incorrect');
