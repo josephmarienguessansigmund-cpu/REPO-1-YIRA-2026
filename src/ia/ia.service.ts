@@ -128,7 +128,7 @@ RÈGLES ABSOLUES:
         A: ['Couture Mode BF','Art et Artisanat','Décoration'],
         S: ['Santé Communautaire','Aide sociale','Restauration'],
         E: ['Gestion commerciale BF','Commerce général','Transit'],
-        C: ['Secrétariat BF','Comptabilité BF','Gestion d'entreprise'],
+        C: ['Secrétariat BF','Comptabilité BF','Gestion entreprise'],
       },
       ML: {
         R: ['Mécanique auto Mali','BTP Mali','Génie civil','Agriculture mécanisée','Pêche artisanale','Menuiserie'],
