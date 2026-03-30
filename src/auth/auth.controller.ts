@@ -42,6 +42,22 @@ export class AuthController {
     return this.authService.loginConseiller(dto.email, dto.password);
   }
 
+  @Post('verifier-otp')
+  async verifierOtp(@Body() dto: { otp: string; token: string; role: string }) {
+    // En Phase 0 pilote : accepter tout OTP valide (6 chiffres)
+    // En Phase 1 : vérification via stockage Redis/Supabase
+    if (!dto.otp || dto.otp.length !== 6) {
+      return { valide: false, message: 'OTP invalide' };
+    }
+    // Mode pilote : OTP simulé — tout code à 6 chiffres est accepté
+    return {
+      valide: true,
+      access_token: dto.token || '',
+      mode: 'PILOTE',
+      message: 'OTP validé (mode pilote Phase 0)'
+    };
+  }
+
   @Get('sante')
   sante() {
     return { status: 'ok', service: 'YIRA Auth', timestamp: new Date().toISOString() };

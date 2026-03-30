@@ -14,7 +14,9 @@ const ENV_VARS: EnvVar[] = [
   { key: 'JWT_SECRET',           required: true,  description: 'Secret JWT authentification' },
   { key: 'ANTHROPIC_API_KEY',    required: false, description: 'Clé Claude Haiku (NIE-Coach)' },
   { key: 'GEMINI_API_KEY',       required: false, description: 'Clé Gemini (fallback IA)' },
-  { key: 'AT_API_KEY',           required: false, description: 'Africa\'s Talking SMS' },
+  { key: 'AT_API_KEY',    required: false, description: 'Africa\'s Talking — clé API SMS' },
+  { key: 'AT_USERNAME',   required: false, description: 'Africa\'s Talking — nom de compte (ex: YIRA)' },
+  { key: 'AT_SENDER_ID',  required: false, description: 'Africa\'s Talking — Sender ID approuvé (ex: YIRA-CI)' },
   { key: 'FEDAPAY_SECRET_KEY',   required: false, description: 'FedaPay paiements' },
 ];
 

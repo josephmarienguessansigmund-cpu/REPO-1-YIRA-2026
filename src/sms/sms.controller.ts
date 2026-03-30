@@ -65,6 +65,16 @@ export class SmsController {
     };
   }
 
+  // Route PUBLIQUE — SMS S1 après inscription (pas de JWT nécessaire)
+  @Post('inscription')
+  async smsInscription(@Body() dto: { telephone: string; prenom: string; code_yira: string }) {
+    const ok = await this.smsService.envoyerS1Inscription(dto.telephone, dto.prenom, dto.code_yira);
+    return {
+      envoye: ok,
+      mode: this.smsService.estModeSimule() ? 'SIMULE' : 'REEL',
+    };
+  }
+
   @Post('test')
   async tester(@Body() dto: { telephone: string; message: string }) {
     const ok = await this.smsService.envoyer(dto.telephone, dto.message);

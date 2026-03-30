@@ -38,7 +38,12 @@ export class AuthService {
     const valid = await bcrypt.compare(password, data.hashedPassword);
     if (!valid) throw new UnauthorizedException('Email ou mot de passe incorrect');
     const token = this.jwtService.sign({ sub: data.id, email: data.email, role: data.role, country_code: data.country_code });
-    return { access_token: token, conseiller: { id: data.id, nom: data.nom, prenom: data.prenom, email: data.email, role: data.role } };
+    const atConfigured = !!(process.env.AT_API_KEY && process.env.AT_API_KEY !== '');
+    return {
+      access_token: token,
+      mode_sms: atConfigured ? 'REEL' : 'SIMULE',
+      conseiller: { id: data.id, nom: data.nom, prenom: data.prenom, email: data.email, role: data.role }
+    };
   }
 
   async inscrireBeneficiaire(dto: any) {
@@ -70,8 +75,10 @@ export class AuthService {
       country_code: 'CI',
     }, { expiresIn: '12h' });
 
+    const atOk = !!(process.env.AT_API_KEY && process.env.AT_API_KEY !== '');
     return {
       access_token: token,
+      mode_sms: atOk ? 'REEL' : 'SIMULE',
       user: {
         id:    'admin-nohama-001',
         email: adminEmail,
