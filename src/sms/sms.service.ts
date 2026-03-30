@@ -12,7 +12,7 @@ export class SmsService {
   constructor(private config: ConfigService) {
     const apiKey   = this.config.get<string>('AT_API_KEY', '');
     const username = this.config.get<string>('AT_USERNAME', 'sandbox');
-    this.senderId  = this.config.get<string>('AT_SENDER_ID', 'YIRA-CI');
+    this.senderId  = this.config.get<string>('AT_SENDER_ID', 'YIRA');  // Sender ID alphanum max 11 chars — approuvé Africa's Talking
 
     // Si pas de clé → mode simulé (Phase 0)
     this.modeSimule = !apiKey || apiKey === 'SIMULE';
@@ -52,86 +52,86 @@ export class SmsService {
 
   async envoyerCodeYira(tel: string, prenom: string, codeYira: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Bienvenue ${prenom} ! Votre code YIRA est ${codeYira}. Conservez-le precieusement. Commencez votre evaluation sur orientations.yira-ci.com`
+      `YIRA: Bienvenue ${prenom} ! Votre code YIRA est ${codeYira}. Conservez-le precieusement. Commencez votre evaluation sur orientations.yira-ci.com`
     );
   }
 
   async envoyerOTP(tel: string, otp: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Votre code de connexion est ${otp}. Valable 5 minutes. Ne le partagez avec personne.`
+      `YIRA: Votre code de connexion est ${otp}. Valable 5 minutes. Ne le partagez avec personne.`
     );
   }
 
   async envoyerSP1Parents(telParent: string, prenomEnfant: string, lienSuivi: string) {
     return this.envoyer(telParent,
-      `YIRA-CI: Votre enfant ${prenomEnfant} vient de s'inscrire sur le programme YIRA d'orientation professionnelle. Suivez son parcours: ${lienSuivi}`
+      `YIRA: Votre enfant ${prenomEnfant} vient de s'inscrire sur le programme YIRA d'orientation professionnelle. Suivez son parcours: ${lienSuivi}`
     );
   }
 
   async envoyerSP2Parents(telParent: string, prenomEnfant: string) {
     return this.envoyer(telParent,
-      `YIRA-CI: ${prenomEnfant} a termine son evaluation psychometrique. Repondez OUI pour valider son Plan d'Insertion. Repondez NON pour plus d'infos.`
+      `YIRA: ${prenomEnfant} a termine son evaluation psychometrique. Repondez OUI pour valider son Plan d'Insertion. Repondez NON pour plus d'infos.`
     );
   }
 
   async envoyerSP3Formation(telParent: string, prenomEnfant: string, nomEtab: string) {
     return this.envoyer(telParent,
-      `YIRA-CI: ${prenomEnfant} commence sa formation a ${nomEtab}. Planning disponible sur votre lien de suivi. Merci de votre confiance.`
+      `YIRA: ${prenomEnfant} commence sa formation a ${nomEtab}. Planning disponible sur votre lien de suivi. Merci de votre confiance.`
     );
   }
 
   async envoyerSP4Inactivite(telParent: string, prenomEnfant: string) {
     return this.envoyer(telParent,
-      `YIRA-CI: ${prenomEnfant} n'a pas participe depuis 5 jours. Votre soutien et vos encouragements sont precieux pour sa reussite.`
+      `YIRA: ${prenomEnfant} n'a pas participe depuis 5 jours. Votre soutien et vos encouragements sont precieux pour sa reussite.`
     );
   }
 
   async envoyerSP5Insertion(telParent: string, prenomEnfant: string, poste: string, entreprise: string) {
     return this.envoyer(telParent,
-      `YIRA-CI: Felicitations ! ${prenomEnfant} a ete recrute(e) comme ${poste} chez ${entreprise}. Merci de votre confiance en YIRA.`
+      `YIRA: Felicitations ! ${prenomEnfant} a ete recrute(e) comme ${poste} chez ${entreprise}. Merci de votre confiance en YIRA.`
     );
   }
 
   async envoyerS1Inscription(tel: string, prenom: string, codeYira: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Bienvenue ${prenom} ! Votre inscription est confirmee. Votre code YIRA est ${codeYira}. Commencez votre parcours sur orientations.yira-ci.com`
+      `YIRA: Bienvenue ${prenom} ! Votre inscription est confirmee. Votre code YIRA est ${codeYira}. Commencez votre parcours sur orientations.yira-ci.com`
     );
   }
 
   async envoyerS3EvalTerminee(tel: string, prenom: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Bravo ${prenom} ! Votre evaluation est terminee. Vos resultats sont en cours d'analyse. Vous serez notifie(e) tres prochainement.`
+      `YIRA: Bravo ${prenom} ! Votre evaluation est terminee. Vos resultats sont en cours d'analyse. Vous serez notifie(e) tres prochainement.`
     );
   }
 
   async envoyerS7ResultatCQP(tel: string, prenom: string, filiere: string, codeYira: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Felicitations ${prenom} ! Vous avez obtenu votre CQP en ${filiere}. Code YIRA: ${codeYira}. Consultez votre certificat sur orientations.yira-ci.com`
+      `YIRA: Felicitations ${prenom} ! Vous avez obtenu votre CQP en ${filiere}. Code YIRA: ${codeYira}. Consultez votre certificat sur orientations.yira-ci.com`
     );
   }
 
   async envoyerS8Embauche(tel: string, prenom: string, employeur: string, poste: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Felicitations ${prenom} ! Vous avez ete embauche(e) comme ${poste} chez ${employeur}. Toute l'equipe YIRA vous felicite pour cette reussite !`
+      `YIRA: Felicitations ${prenom} ! Vous avez ete embauche(e) comme ${poste} chez ${employeur}. Toute l'equipe YIRA vous felicite pour cette reussite !`
     );
   }
 
   async envoyerAlerteConseiller(telConseiller: string, prenomBenef: string, alerte: string) {
     return this.envoyer(telConseiller,
-      `YIRA-CI [ALERTE]: ${prenomBenef} - ${alerte}. Veuillez le/la contacter rapidement.`
+      `YIRA [ALERTE]: ${prenomBenef} - ${alerte}. Veuillez le/la contacter rapidement.`
     );
   }
 
   async envoyerRappelQuiz(tel: string, prenom: string) {
     return this.envoyer(tel,
-      `YIRA-CI: Bonjour ${prenom} ! Le quiz du jour vous attend. Gagnez vos points: orientations.yira-ci.com ou *7572#`
+      `YIRA: Bonjour ${prenom} ! Le quiz du jour vous attend. Gagnez vos points: orientations.yira-ci.com ou *7572#`
     );
   }
 
   // ── USSD Réponse courte ──────────────────────────────────────
   async envoyerResultatUSSD(tel: string, prenom: string, profil: string, score: number) {
     return this.envoyer(tel,
-      `YIRA-CI: ${prenom}, votre profil RIASEC est ${profil} (score ${score}/100). Votre rapport complet est disponible sur orientations.yira-ci.com`
+      `YIRA: ${prenom}, votre profil RIASEC est ${profil} (score ${score}/100). Votre rapport complet est disponible sur orientations.yira-ci.com`
     );
   }
 
