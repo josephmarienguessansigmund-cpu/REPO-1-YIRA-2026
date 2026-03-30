@@ -12,7 +12,7 @@ export class SmsService {
   constructor(private config: ConfigService) {
     const apiKey   = this.config.get<string>('AT_API_KEY', '');
     const username = this.config.get<string>('AT_USERNAME', 'sandbox');
-    this.senderId  = this.config.get<string>('AT_SENDER_ID', 'YIRA');  // Sender ID alphanum max 11 chars — approuvé Africa's Talking
+    this.senderId  = this.config.get<string>('AT_SENDER_ID', 'YIRA-CI');  // Doit correspondre exactement au Sender ID approuvé dans le dashboard AT  // Sender ID alphanum max 11 chars — approuvé Africa's Talking
 
     // Si pas de clé → mode simulé (Phase 0)
     this.modeSimule = !apiKey || apiKey === 'SIMULE';
