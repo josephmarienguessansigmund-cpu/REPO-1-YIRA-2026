@@ -63,7 +63,7 @@ export class AuthService {
     if (email !== adminEmail) {
       throw new UnauthorizedException('Email admin incorrect');
     }
-    const valid = password === adminPassword;
+    const valid = (password||'').trim() === (adminPassword||'').trim();
     if (!valid) {
       throw new UnauthorizedException('Mot de passe admin incorrect');
     }
