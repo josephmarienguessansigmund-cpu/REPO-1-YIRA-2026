@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Plateforme YIRA Digital - Backend NestJS CI",
   "scripts": {
-    "build": "nest build",
+    "build": "./node_modules/.bin/nest build",
     "start": "node dist/main",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "prebuild": "rm -rf dist"
+    "prebuild": "rm -rf dist || true"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
