@@ -27,7 +27,7 @@ export class AuthService {
       .from('YiraConseiller')
       .insert({ ...dto, hashedPassword: hashed_password, country_code: dto.country_code || 'CI' })
       .select().single();
-    if (error) throw new BadRequestException(error.message);
+    if (error) { console.error('SUPABASE ERROR:', JSON.stringify(error)); throw new BadRequestException(error.message); }
     const token = this.jwtService.sign({ sub: data.id, email: data.email, role: data.role, country_code: data.country_code });
     return { conseiller: data, access_token: token };
   }
@@ -51,7 +51,7 @@ export class AuthService {
     const { data, error } = await this.supabase.from('YiraBeneficiaire')
       .insert({ id: crypto.randomUUID(), nom: dto.nom, prenom: dto.prenom, telephone: dto.telephone, genre: dto.genre, niveau_etude: dto.niveau_etude, district: dto.district, country_code: dto.country_code || 'CI', code_yira: code_yira, statut_parcours: 'INSCRIT', type_profile: 'jeune', consentement_rgpd: false, updatedAt: new Date().toISOString() })
       .select().single();
-    if (error) throw new BadRequestException(error.message);
+    if (error) { console.error('SUPABASE ERROR:', JSON.stringify(error)); throw new BadRequestException(error.message); }
     return { beneficiaire: data, code_yira };
   }
   async loginAdmin(email: string, password: string) {
@@ -91,4 +91,5 @@ export class AuthService {
 
 }
 // Fix id 1774303501
+
 
