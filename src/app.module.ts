@@ -10,7 +10,9 @@ import { IaModule } from './ia/ia.module';
 import { CoachModule } from './coach/coach.module';
 import { AdminModule } from './admin/admin.module';
 import { CarteModule } from './carte/carte.module';
-import { PaymentsModule } from './payments/payments.module'; // Importation correcte ici
+import { PaymentsModule } from './payments/payments.module';
+import { AffectationModule } from './affectation/affectation.module';
+import { MessagerieModule } from './messagerie/messagerie.module';
 
 @Module({
   imports: [
@@ -26,7 +28,9 @@ import { PaymentsModule } from './payments/payments.module'; // Importation corr
     CoachModule,
     AdminModule,
     CarteModule,
-    PaymentsModule, // On l'ajoute simplement ici
+    PaymentsModule,
+    AffectationModule,
+    MessagerieModule, // On l'ajoute simplement ici
   ],
   controllers: [AppController],
   providers: [AppService],

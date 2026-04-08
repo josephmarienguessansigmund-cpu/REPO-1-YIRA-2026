@@ -1,12 +1,14 @@
 generator client {
   provider = "prisma-client-js"
 }
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model YiraBeneficiaire {
   id                String   @id @default(cuid())
   code_yira         String   @unique
@@ -337,3 +339,5 @@ model YiraPaysConfig {
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 }
+
+
