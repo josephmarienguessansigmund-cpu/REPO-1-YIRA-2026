@@ -1,4 +1,4 @@
-// Rate limiter en mémoire (sans Redis) — Phase 0
+﻿// Rate limiter en mémoire (sans Redis) — Phase 0
 // Pour la Phase 1 avec Redis, remplacer par @nestjs/throttler + RedisThrottlerStorage
 
 interface RateLimitEntry {

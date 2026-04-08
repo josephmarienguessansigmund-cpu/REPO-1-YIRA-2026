@@ -1,4 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
+﻿// ─────────────────────────────────────────────────────────────────────────────
 // IEvaluationProvider — contrat que TOUT fournisseur d'évaluation doit respecter
 //
 // Actuellement 2 implémentations :

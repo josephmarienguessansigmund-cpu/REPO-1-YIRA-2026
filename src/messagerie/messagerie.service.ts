@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
+ï»¿import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
 
@@ -37,7 +37,7 @@ export class MessagerieService {
       })
       .select()
       .single();
-    if (error) throw new Error(`Erreur création conversation: ${error.message}`);
+    if (error) throw new Error(`Erreur crï¿½ation conversation: ${error.message}`);
     await this.envoyerPasseport(data.id, params.candidat_id);
     return data;
   }
@@ -77,7 +77,7 @@ export class MessagerieService {
   }) {
     const conv = await this.getConversation(params.conversation_id);
     if (!conv) throw new NotFoundException('Conversation introuvable');
-    if (conv.drh_id !== params.drh_id) throw new ForbiddenException('Accès refusé');
+    if (conv.drh_id !== params.drh_id) throw new ForbiddenException('Accï¿½s refusï¿½');
     await this.supabase
       .from('YiraConversation')
       .update({ statut: 'active', anonymisee: false })
@@ -86,11 +86,11 @@ export class MessagerieService {
       beneficiaire_id: conv.candidat_id,
       type_sms: 'MATCHING_INTERET',
       telephone: 'via_profil',
-      contenu: 'YIRA: Un employeur est intéressé par votre profil ! Votre conseiller vous contacte sous 24h.',
+      contenu: 'YIRA: Un employeur est intï¿½ressï¿½ par votre profil ! Votre conseiller vous contacte sous 24h.',
       statut: 'EN_ATTENTE',
       country_code: params.country_code,
     });
-    return { candidat_revele: true, message: 'Profil complet débloqué. Le conseiller YIRA coordonne la mise en relation.' };
+    return { candidat_revele: true, message: 'Profil complet dï¿½bloquï¿½. Le conseiller YIRA coordonne la mise en relation.' };
   }
 
   async enregistrerDecision(params: {
@@ -110,12 +110,12 @@ export class MessagerieService {
       expediteur_id: params.acteur_id,
       expediteur_type: params.acteur_type,
       contenu: params.decision === 'acceptee'
-        ? `Candidature acceptée${params.motif ? ` — ${params.motif}` : ''}. Le contrat sera préparé sous 48h.`
-        : `Candidature non retenue${params.motif ? ` — ${params.motif}` : ''}. Le candidat sera réorienté.`,
+        ? `Candidature acceptï¿½e${params.motif ? ` ï¿½ ${params.motif}` : ''}. Le contrat sera prï¿½parï¿½ sous 48h.`
+        : `Candidature non retenue${params.motif ? ` ï¿½ ${params.motif}` : ''}. Le candidat sera rï¿½orientï¿½.`,
       type_message: 'decision',
       country_code: params.country_code,
     });
-    this.logger.log(`Décision ? ${params.decision} · conversation ${params.conversation_id}`);
+    this.logger.log(`Dï¿½cision ? ${params.decision} ï¿½ conversation ${params.conversation_id}`);
   }
 
   async getMessages(conversation_id: string, utilisateur_id: string) {
@@ -168,7 +168,7 @@ export class MessagerieService {
         niveau: eval_?.niveau ?? 'N2',
         score_employabilite: eval_?.score_global ?? 0,
         profil_riasec: eval_?.profil_riasec ?? 'N/A',
-        disponibilite: 'Immédiate',
+        disponibilite: 'Immï¿½diate',
       }),
       type_message: 'document',
       lu: false,
