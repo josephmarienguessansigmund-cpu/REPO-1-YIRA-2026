@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+ï»¿import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
 
@@ -22,12 +22,12 @@ export class AffectationService {
   private readonly supabase;
 
   private readonly RIASEC_FAMILLES: Record<string, string[]> = {
-    R: ['Bâtiment & Construction', 'Technique & Mécanique'],
-    I: ['Santé & Social', 'Technologie & Numérique'],
-    A: ['Art & Créativité', 'Communication & Médias'],
-    S: ['Éducation & Formation', 'Santé & Social'],
+    R: ['Bï¿½timent & Construction', 'Technique & Mï¿½canique'],
+    I: ['Santï¿½ & Social', 'Technologie & Numï¿½rique'],
+    A: ['Art & Crï¿½ativitï¿½', 'Communication & Mï¿½dias'],
+    S: ['ï¿½ducation & Formation', 'Santï¿½ & Social'],
     E: ['Commerce & Gestion', 'Management & Leadership'],
-    C: ['Comptabilité & Finance', 'Administration & Secrétariat'],
+    C: ['Comptabilitï¿½ & Finance', 'Administration & Secrï¿½tariat'],
   };
 
   constructor(private config: ConfigService) {
@@ -38,7 +38,7 @@ export class AffectationService {
   }
 
   async affecterBeneficiaire(profil: ProfilOrientation) {
-    this.logger.log(`Affectation ? ${profil.prenom} ${profil.nom} · RIASEC: ${profil.riasec_dominant}`);
+    this.logger.log(`Affectation ? ${profil.prenom} ${profil.nom} ï¿½ RIASEC: ${profil.riasec_dominant}`);
     const famille = this.getFamilleMetiers(profil.riasec_dominant);
     const etablissements = await this.chercherEtablissements(famille, profil.ville, profil.country_code);
     const scores = this.scorerEtablissements(etablissements, profil, famille);
@@ -99,7 +99,7 @@ export class AffectationService {
       beneficiaire_id: profil.beneficiaire_id,
       type_sms: 'AFFECTATION_ETAB',
       telephone: etab.telephone || 'N/A',
-      contenu: `YIRA: Candidat ${profil.code_yira} recommandé pour votre établissement. Contact: nohama@yira.ci`,
+      contenu: `YIRA: Candidat ${profil.code_yira} recommandï¿½ pour votre ï¿½tablissement. Contact: nohama@yira.ci`,
       statut: 'EN_ATTENTE',
       country_code: profil.country_code,
     });
