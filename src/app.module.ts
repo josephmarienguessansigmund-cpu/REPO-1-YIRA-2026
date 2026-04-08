@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { SigmundModule } from './sigmund/sigmund.module';
+import { EvaluationModule } from './evaluation/evaluation.module';
 import { UssdModule } from './ussd/ussd.module';
 import { SmsModule } from './sms/sms.module';
 import { IaModule } from './ia/ia.module';
@@ -19,7 +19,7 @@ import { PaymentsModule } from './payments/payments.module'; // Importation corr
       envFilePath: '.env',
     }),
     AuthModule,
-    SigmundModule,
+    EvaluationModule,
     UssdModule,
     SmsModule,
     IaModule,
