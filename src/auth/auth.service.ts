@@ -49,7 +49,7 @@ export class AuthService {
   async inscrireBeneficiaire(dto: any) {
     const code_yira = this.generateCodeYira();
     const { data, error } = await this.supabase.from('YiraBeneficiaire')
-      .insert({ id: crypto.randomUUID(), nom: dto.nom, prenom: dto.prenom, telephone: dto.telephone, genre: dto.genre, niveau_etude: dto.niveau_etude, district: dto.district, country_code: dto.country_code || 'CI', code_yira: code_yira, statut_parcours: 'INSCRIT', type_profile: 'jeune', consentement_rgpd: false, updatedAt: new Date().toISOString() })
+      .insert({ id: crypto.randomUUID(), nom: dto.nom, prenom: dto.prenom, telephone: dto.telephone, genre: dto.genre, niveau_etude: dto.niveau_etude, district: dto.district, country_code: dto.country_code || 'CI', code_yira: code_yira, statut_parcours: 'INSCRIT', type_profile: 'jeune', consentement_rgpd: false, updated_at: new Date().toISOString() })
       .select().single();
     if (error) { console.error('SUPABASE ERROR:', JSON.stringify(error)); throw new BadRequestException(error.message); }
     return { beneficiaire: data, code_yira };
@@ -91,5 +91,6 @@ export class AuthService {
 
 }
 // Fix id 1774303501
+
 
 
