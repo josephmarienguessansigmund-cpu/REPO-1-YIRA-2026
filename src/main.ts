@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+ï»¿import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import * as helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -6,17 +6,17 @@ import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { validateStartup } from './common/startup.validator';
 
 async function bootstrap() {
-  // -- Validation des variables d'environnement au démarrage --
+  // -- Validation des variables d'environnement au dï¿½marrage --
   validateStartup();
 
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'],
   });
 
-  // -- Sécurité HTTP headers -----------------------------------
+  // -- Sï¿½curitï¿½ HTTP headers -----------------------------------
   app.use((helmet as any).default ? (helmet as any).default() : (helmet as any)());
 
-  // -- CORS étendu — tous les domaines YIRA + GitHub Pages ----
+  // -- CORS ï¿½tendu ï¿½ tous les domaines YIRA + GitHub Pages ----
   app.enableCors({
     origin: [
       'https://orientations.yira-ci.com',
@@ -42,29 +42,29 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Country-Code'],
   });
 
-  // -- Préfixe global API --------------------------------------
+  // -- Prï¿½fixe global API --------------------------------------
   app.setGlobalPrefix('api/v1');
 
   // -- ValidationPipe global ----------------------------------
-  // NOTE : forbidNonWhitelisted retiré — les DTOs any() le bloqueraient
+  // NOTE : forbidNonWhitelisted retirï¿½ ï¿½ les DTOs any() le bloqueraient
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
-    forbidNonWhitelisted: false, // ? CORRIGÉ : les body any() passent
+    forbidNonWhitelisted: false, // ? CORRIGï¿½ : les body any() passent
     transformOptions: { enableImplicitConversion: true },
   }));
 
   // -- Global Exception Filter --------------------------------
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // -- Démarrage ----------------------------------------------
+  // -- Dï¿½marrage ----------------------------------------------
   const port = process.env.PORT || 3001;
   await app.listen(port);
 
   const logger = new Logger('Bootstrap');
-  logger.log(`?? YIRA API démarrée — port ${port}`);
-  logger.log(`?? 7 pays CEDEAO actifs — CI BF ML SN NE GN GH`);
-  logger.log(`?? NIE-Coach actif — ${process.env.ANTHROPIC_API_KEY ? 'Claude Haiku' : process.env.GEMINI_API_KEY ? 'Gemini' : '?? Aucune clé IA'}`);
+  logger.log(`?? YIRA API dï¿½marrï¿½e ï¿½ port ${port}`);
+  logger.log(`?? 7 pays CEDEAO actifs ï¿½ CI BF ML SN NE GN GH`);
+  logger.log(`?? NIE-Coach actif ï¿½ ${process.env.ANTHROPIC_API_KEY ? 'Claude Haiku' : process.env.GEMINI_API_KEY ? 'Gemini' : '?? Aucune clï¿½ IA'}`);
 }
 
 bootstrap();
