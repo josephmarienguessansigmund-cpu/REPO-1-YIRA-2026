@@ -13,6 +13,7 @@ import { CarteModule } from './carte/carte.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AffectationModule } from './affectation/affectation.module';
 import { MessagerieModule } from './messagerie/messagerie.module';
+import { PaysModule } from './pays/pays.module';
 
 @Module({
   imports: [
