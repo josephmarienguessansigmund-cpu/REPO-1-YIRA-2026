@@ -48,8 +48,8 @@ async function bootstrap() {
   // -- ValidationPipe global ----------------------------------
   // NOTE : forbidNonWhitelisted retir? ? les DTOs any() le bloqueraient
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
+  whitelist: false,
+  transform: true,
     forbidNonWhitelisted: false, // ? CORRIG? : les body any() passent
     transformOptions: { enableImplicitConversion: true },
   }));
