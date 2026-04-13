@@ -5,24 +5,12 @@ import { SigmundService } from './sigmund.service';
 import { YiraInternalService } from './yira-internal.service';
 import { EVALUATION_PROVIDER } from './evaluation.interface';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// EvaluationModule
-//
-// Le provider actif est contrôlé par la variable d'environnement :
-//   EVALUATION_PROVIDER=sigmund        → SigmundService (défaut Phase 0)
-//   EVALUATION_PROVIDER=yira_internal  → YiraInternalService (Phase 2+)
-//
-// Pour basculer : changer .env + redémarrer. Zéro modification de code.
-// ─────────────────────────────────────────────────────────────────────────────
-
 @Module({
   imports: [ConfigModule],
   controllers: [EvaluationController],
   providers: [
     SigmundService,
     YiraInternalService,
-
-    // Factory provider — injecte le bon service selon .env
     {
       provide: EVALUATION_PROVIDER,
       useFactory: (
@@ -34,11 +22,11 @@ import { EVALUATION_PROVIDER } from './evaluation.interface';
         if (provider === 'yira_internal') {
           return yiraInternal;
         }
-        return sigmund; // défaut : SigmundTest
+        return sigmund;
       },
       inject: [ConfigService, SigmundService, YiraInternalService],
     },
   ],
-  exports: [EVALUATION_PROVIDER, SigmundService],
+  exports: [EVALUATION_PROVIDER, SigmundService, YiraInternalService],
 })
 export class EvaluationModule {}
