@@ -27,6 +27,7 @@ import { PaysModule } from './pays/pays.module';
     SmsModule,
     IaModule,
     CoachModule,
+    PaysModule,
     AdminModule,
     CarteModule,
     PaymentsModule,
