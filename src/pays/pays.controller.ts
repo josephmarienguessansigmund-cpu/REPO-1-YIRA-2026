@@ -7,9 +7,17 @@ export class PaysController {
   constructor(private readonly paysService: PaysService) {}
 
   @Get()
-  async listerPays() {
-    const pays = await this.paysService.getTousPays();
-    return { success: true, data: pays, total: pays.length };
+async listerPays() {
+  const pays = await this.paysService.getPaysActifs();
+  return { success: true, data: pays, total: pays.length };
+}
+
+@UseGuards(JwtAuthGuard)
+@Get('tous')
+async listerTousPays() {
+  const pays = await this.paysService.getTousPays();
+  return { success: true, data: pays, total: pays.length };
+}
   }
 
   @Get(':code')
