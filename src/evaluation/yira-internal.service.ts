@@ -320,16 +320,13 @@ export class YiraInternalService implements IEvaluationProvider {
       provider: 'yira_internal',
       nb_questions: questions.length,
       questions: questions.map(q => ({
-        id: q.id,
-        module: q.module,
-        dimension: q.dimension,
-        texte: q.texte,
-        echelle: [
-          { valeur: 4, libelle: 'Tout a fait d\'accord' },
-          { valeur: 3, libelle: 'Plutot d\'accord' },
-          { valeur: 2, libelle: 'Plutot pas d\'accord' },
-          { valeur: 1, libelle: 'Pas du tout d\'accord' },
-        ],
+        label_question: `[${q.module.toUpperCase()}] ${q.texte}`,
+        r1: 'Tout a fait d accord',
+        r2: 'Plutot d accord',
+        r3: 'Neutre',
+        r4: 'Plutot pas d accord',
+        r5: 'Pas du tout d accord',
+        nb_reponses: 5,
       })),
     };
   }
@@ -342,10 +339,13 @@ export class YiraInternalService implements IEvaluationProvider {
   async recupererResultats(assessment_id: number): Promise<EvaluationResultat> {
     return {
       assessment_id,
-      profil_riasec: 'S',
-      scores: { R: 65, I: 55, A: 70, S: 85, E: 75, C: 60 },
-      rapport_url: null,
-      statut: 'termine',
+      provider: 'yira_internal',
+      scores: [65, 55, 70, 85, 75, 60],
+      profil_riasec: 'SAE',
+      score_employabilite: 72,
+      criteres: ['Leadership', 'Communication', 'Travail en equipe'],
+      rapport_pdf_url: null,
+      pii_genere: false,
     };
   }
 
