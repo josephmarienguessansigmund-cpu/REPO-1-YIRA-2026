@@ -566,7 +566,7 @@ export class YiraInternalService implements IEvaluationProvider {
   // ---------------------------------------------------------------------------
   private assemblerQuestions(niveau: 'N1' | 'N2' | 'N3'): Question[] {
     const piliers: (keyof typeof POIDS_PILIERS)[] = ['personnalite', 'soft_skills', 'riasec', 'motivation'];
-    const limite = LIMITES_PAR_NIVEAU[niveau];
+    const limite = niveau === 'N3' ? 90 : niveau === 'N2' ? 70 : 30;
     const result: Question[] = [];
 
     // Ajouter les questions N3 Leadership si applicable
