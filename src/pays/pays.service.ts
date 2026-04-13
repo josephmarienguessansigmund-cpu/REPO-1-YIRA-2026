@@ -69,7 +69,13 @@ export class PaysService implements OnModuleInit {
 
       this.cache.clear();
       for (const pays of data ?? []) {
-        this.cache.set(pays.code, pays as YiraPays);
+        const paysData = {
+          ...pays,
+          districts: typeof pays.districts === 'string' ? JSON.parse(pays.districts) : (pays.districts ?? []),
+          operateurs: typeof pays.operateurs === 'string' ? JSON.parse(pays.operateurs) : (pays.operateurs ?? []),
+          langues_dispo: typeof pays.langues_dispo === 'string' ? JSON.parse(pays.langues_dispo) : (pays.langues_dispo ?? []),
+        };
+        this.cache.set(pays.code, paysData as YiraPays);
       }
 
       this.dernierChargement = new Date();
