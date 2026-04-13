@@ -74,16 +74,20 @@ export class EvaluationController {
     @Body() dto: InitEvaluationDto,
     @TenantId() tenant_id: string,
   ) {
-    const params: EvaluationInitParams = {
-      prenom: dto.prenom,
-      nom: dto.nom,
-      niveau: dto.niveau,
-      tenant_id,
-      signaletique: {
-        ...dto.signaletique,
-        date_naissance: new Date(dto.signaletique.date_naissance),
-      },
-    };
+  const params: EvaluationInitParams = {
+  prenom: dto.prenom ?? 'Beneficiaire',
+  nom: dto.nom ?? 'YIRA',
+  niveau: dto.niveau ?? 'N1',
+  tenant_id,
+  signaletique: {
+    genre: dto.signaletique?.genre ?? 'nsp',
+    date_naissance: new Date(dto.signaletique?.date_naissance ?? '2000-01-01'),
+    annees_experience: dto.signaletique?.annees_experience ?? 0,
+    niveau_etude: dto.signaletique?.niveau_etude ?? 'bepc',
+    type_formation: dto.signaletique?.type_formation ?? 'generale',
+    statut: dto.signaletique?.statut ?? 'etudiant',
+  },
+};
 
     const session = await this.provider.initialiserEvaluation(params);
 
