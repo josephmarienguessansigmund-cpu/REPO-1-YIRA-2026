@@ -8,7 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 export class AuthService {
   private supabase;
 
-  constructor(private jwtService: JwtService, private config: ConfigService, private smsService: any) {
+  constructor(private jwtService: JwtService, private config: ConfigService) {
     this.supabase = createClient(
       this.config.get('SUPABASE_URL', ''),
       this.config.get('SUPABASE_SERVICE_KEY', ''),
@@ -59,8 +59,8 @@ export class AuthService {
       .insert({ id: crypto.randomUUID(), nom: dto.nom, prenom: dto.prenom, telephone: dto.telephone, genre: dto.genre, niveau_etude: dto.niveau_etude, district: dto.district, country_code: dto.country_code || 'CI', code_yira: code_yira, statut_parcours: 'INSCRIT', type_profile: 'jeune', consentement_rgpd: false, updated_at: new Date().toISOString() })
       .select().single();
     if (error) { console.error('SUPABASE ERROR:', JSON.stringify(error)); throw new BadRequestException(error.message); }
-    this.smsService.envoyer(dto.telephone,'S1_BIENVENUE',{prenom:dto.prenom}).catch(()=>{});
-    this.smsService.envoyer(dto.telephone,'S2_CODE_YIRA',{code_yira:code_yira}).catch(()=>{});
+    =>{});
+    =>{});
     return { beneficiaire: data, code_yira };
   }
 
