@@ -14,25 +14,15 @@ import { PaymentsModule } from './payments/payments.module';
 import { AffectationModule } from './affectation/affectation.module';
 import { MessagerieModule } from './messagerie/messagerie.module';
 import { PaysModule } from './pays/pays.module';
+import { FilieresModule } from './filieres/filieres.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    AuthModule,
-    EvaluationModule,
-    UssdModule,
-    SmsModule,
-    IaModule,
-    CoachModule,
-    PaysModule,
-    AdminModule,
-    CarteModule,
-    PaymentsModule,
-    AffectationModule,
-    MessagerieModule, // On l'ajoute simplement ici
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    AuthModule, EvaluationModule, UssdModule, SmsModule,
+    IaModule, CoachModule, PaysModule, AdminModule,
+    CarteModule, PaymentsModule, AffectationModule,
+    MessagerieModule, FilieresModule,
   ],
   controllers: [AppController],
   providers: [AppService],
