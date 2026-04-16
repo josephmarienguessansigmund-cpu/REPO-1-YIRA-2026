@@ -1,9 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
-export class FilieresService implements OnModuleInit {
+export class FilieresService {
   private supabase: SupabaseClient;
 
   constructor(private config: ConfigService) {
@@ -13,16 +13,13 @@ export class FilieresService implements OnModuleInit {
     );
   }
 
-  async onModuleInit() {}
-
   async findAll(pays: string = 'CI') {
     const { data, error } = await this.supabase
       .from('filieres')
       .select('*')
       .eq('pays_code', pays.toUpperCase())
-      .eq('actif', true)
-      .order('domaine', { ascending: true });
-    if (error) throw error;
-    return { data, total: data?.length ?? 0, pays };
+      .order('domaine');
+    if (error) throw new Error(error.message);
+    return { data: data ?? [], total: data?.length ?? 0, pays };
   }
 }
