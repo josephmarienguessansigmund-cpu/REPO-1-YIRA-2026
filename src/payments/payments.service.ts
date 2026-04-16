@@ -1,59 +1,46 @@
-﻿import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-
-// Importation sécurisée du SDK FedaPay
-const { FedaPay, Transaction } = require('fedapay');
+﻿import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { FedaPayProvider } from './providers/fedapay.provider';
+// import { PaystackProvider } from './providers/paystack.provider'; // Futur !
 
 @Injectable()
 export class PaymentsService {
-  private readonly logger = new Logger(PaymentsService.name);
+  constructor(
+    private prisma: PrismaService,
+    private fedapay: FedaPayProvider,
+    // private paystack: PaystackProvider
+  ) {}
 
-  constructor(private configService: ConfigService) {
-    const secretKey = this.configService.get<string>('FEDAPAY_SECRET_KEY');
+  async creerLienBilan(user: any, montant: number, niveau: string, pays: string = 'CI') {
+    // 1. On choisit le provider dynamiquement
+    let provider = this.fedapay; 
     
-    if (secretKey) {
-      FedaPay.setApiKey(secretKey);
-      FedaPay.setEnvironment('sandbox'); // Gardez 'sandbox' pour vos tests
-      this.logger.log('FedaPay configuré avec succès.');
-    } else {
-      this.logger.error('Variable FEDAPAY_SECRET_KEY introuvable sur Railway !');
+    if (pays === 'NG') {
+        // provider = this.paystack; // Simple comme bonjour à switcher
     }
-  }
 
-  async creerLienBilan(user: any, montant: number, niveau: string) {
-    try {
-      // 1. Nettoyage radical des données (FedaPay rejette les caractères spéciaux)
-      const cleanEmail = user.email.trim().toLowerCase();
-      const cleanPhone = user.tel.replace(/\D/g, '').slice(-10); // Garde les 10 derniers chiffres
-      
-      // On remplace "N'Guessan" par "NGUESSAN" pour éviter le bug de l'apostrophe
-      const cleanFirstName = "Joseph-Marie";
-      const cleanLastName = "NGUESSAN";
+    // 2. On génère le lien via le provider choisi
+    const result = await provider.generateLink({
+      amount: montant,
+      description: `Bilan YIRA Niveau ${niveau}`,
+      customer: {
+        firstname: "Joseph-Marie",
+        lastname: "NGUESSAN",
+        email: user.email.trim().toLowerCase(),
+        phone: user.tel.replace(/\D/g, '').slice(-10)
+      }
+    });
 
-      this.logger.log(`Génération lien pour : ${cleanEmail} | Montant : ${montant} XOF`);
+    // 3. ON ENREGISTRE DANS LA DB SÉCURISÉE (Via ton PrismaService)
+    await this.prisma.client.yiraPayments.create({
+      data: {
+        amount: montant,
+        externalId: result.transactionId,
+        provider: provider.name,
+        country_code: pays
+      }
+    });
 
-      const transaction = await Transaction.create({
-        description: `Bilan YIRA Niveau ${niveau}`,
-        amount: Math.round(montant),
-        currency: { iso: 'XOF' },
-        callback_url: 'https://yira-api-production.up.railway.app/api/v1/payments/callback',
-        customer: {
-          firstname: cleanFirstName,
-          lastname: cleanLastName,
-          email: cleanEmail,
-          phone_number: {
-            number: cleanPhone,
-            country: 'ci'
-          }
-        }
-      });
-
-      const token = await transaction.generateToken();
-      return { url: token.url };
-
-    } catch (error) {
-      this.logger.error(`Erreur FedaPay : ${error.message}`);
-      throw error;
-    }
+    return { url: result.url };
   }
 }
