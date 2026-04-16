@@ -337,4 +337,17 @@ model YiraPaysConfig {
   updated_at        DateTime @updatedAt
 }
 
+model YiraPayment {
+  id              String   @id @default(cuid())
+  beneficiaire_id String
+  montant         Float
+  devise          String   @default("XOF")
+  reference       String   @unique
+  statut          String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  provider        String   // e.g., "FEDAPAY"
+  country_code    String   @default("CI")
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
 
