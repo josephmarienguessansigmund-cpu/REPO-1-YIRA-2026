@@ -32,7 +32,7 @@ export class PaymentsService {
     });
 
     // 3. ON ENREGISTRE DANS LA DB SÉCURISÉE (Via ton PrismaService)
-    await this.prisma.client.yiraPayment.create({
+    await this.prisma.yiraPayment.create({
       data: {
         amount: montant,
         externalId: result.transactionId,
